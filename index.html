@@ -1,161 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>A$$ OBFUSCATOR</title>
   <style>
-    * { box-sizing: border-box; margin:0; padding:0 }
-    body {
-      background: #111;
-      color: #eee;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex; align-items: center; justify-content: center;
-      min-height:100vh; padding:1rem;
-    }
-    .card {
-      background: linear-gradient(145deg,#1c1c1c,#0a0a0a);
-      border-radius:1rem;
-      box-shadow:10px 10px 20px #000, -10px -10px 20px #222;
-      max-width:600px; width:100%; padding:2rem;
-    }
-    h1 {
-      text-align:center;
-      font-size:2rem;
-      margin-bottom:1.5rem;
-      color:#0af;
-      text-shadow:0 0 8px #0af,0 0 16px #0af;
-    }
-    label {
-      display:block; margin-bottom:.5rem;
-      font-weight:bold;
-    }
-    textarea {
-      width:100%; height:120px;
-      background:#111; color:#ddd;
-      border:none; border-radius:.5rem;
-      padding:.75rem; margin-bottom:1rem;
-      resize: vertical;
-      box-shadow: inset 4px 4px 8px #000, inset -4px -4px 8px #222;
-      font-family: monospace;
-    }
-    input[type=file] {
-      margin-bottom:1rem;
-      color: #aaa;
-    }
-    .buttons {
-      display:flex; gap: .75rem; margin-bottom:1rem;
-      flex-wrap: wrap;
-    }
-    button {
-      flex:1; padding:.75rem;
-      background:#0af; color:#0d0d0d;
-      border:none; border-radius:.75rem;
-      font-size:1rem; font-weight:bold;
-      cursor:pointer; text-transform:uppercase;
-      box-shadow:4px 4px 8px #000, -4px -4px 8px #222;
-      transition:transform .1s, box-shadow .1s;
-    }
-    button:active {
-      transform:translateY(2px);
-      box-shadow:2px 2px 4px #000, -2px -2px 4px #222;
-    }
-    @media(max-width:480px){
-      h1{font-size:1.5rem}
-      .buttons{flex-direction:column}
-    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#111;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+    .card{background:linear-gradient(145deg,#1c1c1c,#0a0a0a);border-radius:1rem;box-shadow:10px 10px 20px #000,-10px -10px 20px #222;max-width:600px;width:100%;padding:2rem}
+    h1{text-align:center;color:#0af;text-shadow:0 0 8px #0af,0 0 16px #0af;margin-bottom:1.5rem}
+    label{display:block;margin:1rem 0 .5rem;font-weight:bold}
+    textarea{width:100%;height:120px;background:#111;color:#ddd;border:none;border-radius:.5rem;padding:.75rem;margin-bottom:1rem;resize:vertical;box-shadow:inset 4px 4px 8px #000,inset -4px -4px 8px #222;font-family:monospace}
+    input[type=file]{margin-bottom:1rem;color:#aaa}
+    button{display:block;width:100%;padding:.75rem;margin:.5rem 0;background:#0af;color:#0d0d0d;border:none;border-radius:.75rem;font-weight:bold;text-transform:uppercase;cursor:pointer;box-shadow:4px 4px 8px #000,-4px -4px 8px #222;transition:.1s}
+    button:active{transform:translateY(2px);box-shadow:2px 2px 4px #000,-2px -2px 4px #222}
+    @media(max-width:480px){h1{font-size:1.5rem}}
   </style>
 </head>
 <body>
-
   <div class="card">
     <h1>A$$ OBFUSCATOR</h1>
 
-    <label for="fileInput">Upload .lua file</label>
+    <label>Upload .lua file</label>
     <input type="file" id="fileInput" accept=".lua">
 
-    <label for="inCode">Or paste your Lua code</label>
-    <textarea id="inCode" placeholder="-- Paste or upload your Lua code here"></textarea>
+    <label>Or paste your Lua code</label>
+    <textarea id="inCode" placeholder="-- your Lua code"></textarea>
 
-    <div class="buttons">
-      <button id="btnObf">Obfuscate</button>
-      <button id="btnCopy">Copy Output</button>
-      <button id="btnDl">Download .lua</button>
-    </div>
+    <button id="btnObf">Obfuscate</button>
 
-    <label for="outCode">Obfuscated Output</label>
-    <textarea id="outCode" readonly placeholder="Your obfuscated code will appear here"></textarea>
+    <label>Obfuscated Output</label>
+    <textarea id="outCode" readonly placeholder="obfuscated code"></textarea>
+
+    <button id="btnCopy">Copy Output</button>
+    <button id="btnDl">Download .lua</button>
   </div>
 
   <script>
-    const fileInput = document.getElementById('fileInput');
-    const inCode    = document.getElementById('inCode');
-    const outCode   = document.getElementById('outCode');
-    const btnObf    = document.getElementById('btnObf');
-    const btnCopy   = document.getElementById('btnCopy');
-    const btnDl     = document.getElementById('btnDl');
+  // -- utils
+  const rnd = () => '_' + Math.random().toString(36).substr(2,8);
+  function xorEncrypt(str, key) {
+    let out = '';
+    for(let i=0;i<str.length;i++){
+      out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return btoa(out);
+  }
+  function xorDecrypt(b64, key) {
+    let data = atob(b64), out = '';
+    for(let i=0;i<data.length;i++){
+      out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return out;
+  }
 
-    // Load file into textarea
-    fileInput.addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = ev => inCode.value = ev.target.result;
-      r.readAsText(f, 'UTF-8');
+  // -- UI refs
+  const fileInput = document.getElementById('fileInput'),
+        inCode    = document.getElementById('inCode'),
+        outCode   = document.getElementById('outCode'),
+        btnObf    = document.getElementById('btnObf'),
+        btnCopy   = document.getElementById('btnCopy'),
+        btnDl     = document.getElementById('btnDl');
+
+  fileInput.addEventListener('change', e => {
+    let f = e.target.files[0]; if(!f) return;
+    let r = new FileReader();
+    r.onload = ev => inCode.value = ev.target.result;
+    r.readAsText(f,'UTF-8');
+  });
+
+  btnObf.addEventListener('click', () => {
+    let code = inCode.value;
+    if(!code.trim()) return alert('Provide Lua code first.');
+
+    // pick random encryption key
+    const key = Math.random().toString(36).substr(2,8);
+
+    // encrypt all string literals: "...", '...'
+    code = code.replace(/(["'])(.*?)(\1)/g, (m, q, s) => {
+      return q + '__STR__' + xorEncrypt(s, key) + '__END__' + q;
     });
 
-    // Obfuscate: hex-wrap + random helper names + loadstring/load
-    btnObf.addEventListener('click', () => {
-      const code = inCode.value.trim();
-      if (!code) return alert('Paste or upload some Lua code first.');
+    // control-flow flattening: wrap real code in a table of blocks
+    let blocks = code.split('\n').map((ln,i)=>`${i}function(){${ln}}`);
+    let order = blocks.map((_,i)=>i).sort(()=>Math.random()-0.5);
+    let flat = `local _BLK={${blocks.join(',')}}\n` +
+               `local _ORD={${order.join(',')}}\n` +
+               `for i=1,#_ORD do _BLK[_ORD[i]]() end`;
 
-      // hex-encode
-      let hex = '';
-      for (let i=0; i<code.length; i++) {
-        let h = code.charCodeAt(i).toString(16);
-        hex += h.length===1? '0'+h : h;
-      }
+    // wrap, hex encode
+    let hex = [...flat].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
 
-      // random names
-      const rnd = () => '_' + Math.random().toString(36).substr(2,8);
-      const decFn = rnd();
-      const execFn = rnd();
+    // build loader parts
+    const dFn = rnd(), xFn = rnd(), j1 = rnd(), j2 = rnd();
+    let loader =
+`--[[OBFUSCATED BY A$$ OBFUSCATOR A.K.A Reo]]--
 
-      // build loader
-      const loader =
-`-- Obfuscated by A$$ OBFUSCATOR
-local function ${decFn}(s)
-  local res=""
-  for i=1,#s,2 do res=res..string.char(tonumber(s:sub(i,i+1),16)) end
-  return res
+-- junk funcs (anti-static)
+local function ${j1}() return math.random() end
+local function ${j2}() for i=1,3 do end end
+
+-- anti-debug
+pcall(function()
+  if debug then rawset(_G,'debug',nil) end
+  if getfenv then rawset(_G,'getfenv',nil) end
+end)
+
+local function ${dFn}(s)
+  local out=''
+  for i=1,#s,2 do
+    out = out..string.char(tonumber(s:sub(i,i+1),16))
+  end
+  return out
 end
 
-local ${execFn} = loadstring or load
-${execFn}(${decFn}("${hex}"))()`;
+local ${xFn} = load or loadstring
+${xFn}(${dFn}("${hex}"))()`;
 
-      outCode.value = loader;
-    });
+    outCode.value = loader;
+  });
 
-    // Copy to clipboard
-    btnCopy.addEventListener('click', () => {
-      if (!outCode.value) return;
-      navigator.clipboard.writeText(outCode.value)
-        .then(()=> alert('Output copied!'))
-        .catch(()=> alert('Failed to copy.'));
-    });
+  btnCopy.addEventListener('click', () => {
+    if(!outCode.value) return;
+    navigator.clipboard.writeText(outCode.value)
+      .then(()=>alert('Copied!')).catch(()=>alert('Fail.'));
+  });
 
-    // Download .lua file
-    btnDl.addEventListener('click', () => {
-      if (!outCode.value) return;
-      const blob = new Blob([outCode.value], {type:'text/plain'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'obfuscated.lua';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+  btnDl.addEventListener('click', () => {
+    if(!outCode.value) return;
+    const blob=new Blob([outCode.value],{type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='obfuscated.lua'; a.click();
+    URL.revokeObjectURL(url);
+  });
   </script>
-
 </body>
-  </html>
+</html>
