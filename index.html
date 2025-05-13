@@ -1,103 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>A$$ OBFUSCATOR</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#111;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
-    .card{background:linear-gradient(145deg,#1c1c1c,#0a0a0a);border-radius:1rem;box-shadow:10px 10px 20px #000,-10px -10px 20px #222;max-width:600px;width:100%;padding:2rem}
-    h1{text-align:center;color:#0af;text-shadow:0 0 8px #0af,0 0 16px #0af;margin-bottom:1.5rem}
-    label{display:block;margin:1rem 0 .5rem;font-weight:bold}
-    textarea{width:100%;height:120px;background:#111;color:#ddd;border:none;border-radius:.5rem;padding:.75rem;margin-bottom:1rem;resize:vertical;box-shadow:inset 4px 4px 8px #000,inset -4px -4px 8px #222;font-family:monospace}
-    input[type=file]{margin-bottom:1rem;color:#aaa}
-    button{display:block;width:100%;padding:.75rem;margin:.5rem 0;background:#0af;color:#0d0d0d;border:none;border-radius:.75rem;font-weight:bold;text-transform:uppercase;cursor:pointer;box-shadow:4px 4px 8px #000,-4px -4px 8px #222;transition:.1s}
-    button:active{transform:translateY(2px);box-shadow:2px 2px 4px #000,-2px -2px 4px #222}
-    @media(max-width:480px){h1{font-size:1.5rem}}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #111;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .card {
+      background: linear-gradient(145deg,#1c1c1c,#0a0a0a);
+      border-radius: 1rem;
+      box-shadow: 10px 10px 20px #000, -10px -10px 20px #222;
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #0af;
+      text-shadow: 0 0 8px #0af, 0 0 16px #0af;
+    }
+    label {
+      display: block;
+      margin: 1rem 0 .5rem;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #111;
+      color: #ddd;
+      border: none;
+      border-radius: .5rem;
+      padding: .75rem;
+      margin-bottom: 1rem;
+      resize: vertical;
+      box-shadow: inset 4px 4px 8px #000, inset -4px -4px 8px #222;
+      font-family: monospace;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: .75rem;
+      margin: .5rem 0;
+      background: #0af;
+      color: #0d0d0d;
+      border: none;
+      border-radius: .75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 4px 4px 8px #000, -4px -4px 8px #222;
+      transition: transform .1s, box-shadow .1s;
+    }
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 2px 2px 4px #000, -2px -2px 4px #222;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.5rem; }
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>A$$ OBFUSCATOR</h1>
 
-    <label>Upload .lua file</label>
-    <input type="file" id="fileInput" accept=".lua">
+    <label for="inCode">Paste your Lua code</label>
+    <textarea id="inCode" placeholder="-- your Lua code here"></textarea>
 
-    <label>Or paste your Lua code</label>
-    <textarea id="inCode" placeholder="-- your Lua code"></textarea>
+    <button id="btnObf">Obfuscate → Bytecode</button>
 
-    <button id="btnObf">Obfuscate</button>
-
-    <label>Obfuscated Output</label>
-    <textarea id="outCode" readonly placeholder="obfuscated code"></textarea>
+    <label for="outCode">Obfuscated Output</label>
+    <textarea id="outCode" readonly placeholder="Your obfuscated code will appear here"></textarea>
 
     <button id="btnCopy">Copy Output</button>
     <button id="btnDl">Download .lua</button>
   </div>
 
+  <!-- Fengari VM in JS/WASM -->
+  <script src="https://unpkg.com/fengari-web/dist/fengari-web.js"></script>
   <script>
-    // generate random helper names
-    const rnd = ()=>'_'+Math.random().toString(36).substr(2,8);
+    const { lua, lauxlib, to_luastring, to_jsstring } = fengari;
+    // Create a new Lua state
+    const L = lauxlib.luaL_newstate();
+    lua.luaL_openlibs(L);
 
-    // simple hex encoder
-    function hexEncode(s){
-      return Array.from(s).map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
-    }
+    const inCode  = document.getElementById('inCode');
+    const outCode = document.getElementById('outCode');
+    const btnObf  = document.getElementById('btnObf');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnDl   = document.getElementById('btnDl');
 
-    const fileInput = document.getElementById('fileInput'),
-          inCode    = document.getElementById('inCode'),
-          outCode   = document.getElementById('outCode'),
-          btnObf    = document.getElementById('btnObf'),
-          btnCopy   = document.getElementById('btnCopy'),
-          btnDl     = document.getElementById('btnDl');
+    btnObf.addEventListener('click', () => {
+      const src = inCode.value;
+      if (!src.trim()) return alert('Please paste your Lua code.');
 
-    fileInput.addEventListener('change', e=>{
-      let f=e.target.files[0]; if(!f) return;
-      let r=new FileReader();
-      r.onload=ev=>inCode.value=ev.target.result;
-      r.readAsText(f,'UTF-8');
-    });
+      // Build a chunk that returns the bytecode dump
+      const chunk = to_luastring(
+        `local f = loadstring([==[${src}]==]) or load([==[${src}]==])\n` +
+        `return string.dump(f)`
+      );
 
-    btnObf.addEventListener('click', ()=>{
-      let code=inCode.value;
-      if(!code.trim()) return alert('Please provide Lua code.');
+      lauxlib.luaL_loadbuffer(L, chunk, null, to_luastring("obfuscator"));
+      lua.lua_pcall(L, 0, 1, 0);
 
-      // hexify your script
-      const h = hexEncode(code);
+      // Get the bytecode as a JS string
+      const dumped = to_jsstring(lua.lua_tostring(L, -1));
 
-      // random names
-      const j1=rnd(), j2=rnd(), dFn=rnd(), xFn=rnd(), hexVar=rnd(), txtVar=rnd();
+      // Base64-encode it
+      const b64 = btoa(dumped);
 
-      // build loader
-      const loader =
+      // Build the final Lua stub
+      const obf =
 `--[[OBFUSCATED BY A$$ OBFUSCATOR A.K.A Reo]]--
-local function ${j1}() return math.random() end
-local function ${j2}() end
-pcall(function() if debug then rawset(_G,'debug',nil) end if getfenv then rawset(_G,'getfenv',nil) end end)
-local ${hexVar} = "${h}"
-local ${txtVar} = ""
-for i=1,#${hexVar}-1,2 do
-  ${txtVar} = ${txtVar} .. string.char(tonumber(${hexVar}:sub(i,i+1),16))
-end
-local ${xFn} = load or loadstring
-${xFn}(${txtVar})()`;
+local b = "${b64}"
+local bytecode = game:GetService("HttpService"):Base64Decode(b)
+local f = loadstring or load
+f(bytecode)()`;
 
-      outCode.value = loader;
+      outCode.value = obf;
+
+      // clear the Lua stack
+      lua.lua_settop(L, 0);
     });
 
-    btnCopy.addEventListener('click', ()=>{
-      if(!outCode.value) return;
+    btnCopy.addEventListener('click', () => {
+      if (!outCode.value) return;
       navigator.clipboard.writeText(outCode.value)
-        .then(()=>alert('Copied!'))
-        .catch(()=>alert('Copy failed'));
+        .then(() => alert('Copied!'))
+        .catch(() => alert('Copy failed'));
     });
 
-    btnDl.addEventListener('click', ()=>{
-      if(!outCode.value) return;
-      const blob=new Blob([outCode.value],{type:'text/plain'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download='obfuscated.lua'; a.click();
+    btnDl.addEventListener('click', () => {
+      if (!outCode.value) return;
+      const blob = new Blob([outCode.value], { type: 'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'obfuscated.lua';
+      a.click();
       URL.revokeObjectURL(url);
     });
   </script>
