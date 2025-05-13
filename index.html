@@ -1,165 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A$$ OBFUSCATOR V0.01</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      margin: 0;
-      background-color: #220000; /* Dark red */
-      color: white;
-    }
+<!DOCTYPE html><html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reo Obfuscator RELEASE</title>
+    <style>
+      /* Animations */
+      @keyframes popup { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+      @keyframes idle { 0% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
+      * { margin:0; padding:0; box-sizing:border-box; outline:none; border:none; text-decoration:none; }
+      body { display:flex; font-family: Geneva, Verdana, sans-serif; color:#fff; height:100vh; background:#333; justify-content:center; align-items:center; }
+      /* navbar */
+      .navbar { position:fixed; top:0; left:0; right:0; height:5rem; padding:1.4rem 5%; display:flex; justify-content:space-between; align-items:center; background:rgba(68,68,68,0.3); border-bottom:3px solid rgba(34,34,34,0.5); box-shadow:0 0 20px #252525; z-index:9999; }
+      .logo { display:flex; animation:idle 3s ease-in-out infinite alternate; transition:0.2s; }
+      .logo span { color:rgb(255,143,16); transition:0.2s; }
+      .logo:hover span { color:#fff; }
+      .nav a { color:#fff; font-size:1rem; margin:0 1rem; transform:scale(0.9); transition:0.2s; }
+      .nav a:hover { transform:scale(1.1); color:rgba(255,255,255,0.7); }
+      .profile { width:2.5rem; height:2.5rem; border-radius:20px; background:url("./xeerazz.jpg") center/cover; box-shadow:0 0 12px #222; transition:0.2s; }
+      .profile:hover { border-radius:13px; border:1.5px solid #fff; transform:scale(1.5); }
+      /* Card */
+      form { width:75%; }
+      .card { width:100%; background:rgba(68,68,68,0.5); border:2px solid rgba(255,255,255,0.1); border-radius:10px; box-shadow:0 0 42px #222; animation:popup 1s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+      .card-header { padding:1rem; text-align:center; border-bottom:2px solid rgba(255,255,255,0.5); }
+      .card-header h3 { color:#fff; transition:0.5s; }
+      .card-header h3:hover { color:rgb(255,143,16); }
+      .card-body { padding:1rem; }
+      .filescript { margin-bottom:1rem; }
+      .filescript input[type=file] { display:none; }
+      .filescript label { display:flex; justify-content:center; align-items:center; background:rgba(68,68,68,0.5); border:2px solid rgba(255,255,255,0.3); padding:10px; border-radius:5px; color:rgba(255,255,255,0.9); box-shadow:0 0 10px #222; transition:0.2s; cursor:pointer; }
+      .filescript label:hover { transform:scale(0.95); border-color:rgb(255,143,16); }
+      #num-of-files { margin-top:0.5rem; }
+      .inputBox { position:relative; width:250px; margin-bottom:0.4rem; }
+      .inputBox input { width:100%; padding:10px; border:1px solid rgba(255,255,255,0.25); background:rgba(68,68,68,0.5); border-radius:5px; color:#fff; transition:0.5s; }
+      .inputBox span { position:absolute; left:10px; top:10px; color:rgba(255,255,255,0.25); transition:0.5s; pointer-events:none; }
+      .inputBox input:focus + span,
+      .inputBox input:valid + span { transform:translateY(-150%) scale(0.75); color:rgb(255,143,16); background:#444; padding:0 5px; }
+      .inputBox input:focus,
+      .inputBox input:valid { border-color:rgb(255,143,16); background:#444; }
+      .card-body button { display:block; margin-top:1rem; padding:15px 30px; background:#fff; color:#000; font-size:1.1em; text-transform:uppercase; cursor:pointer; transition:0.5s; position:relative; overflow:hidden; }
+      .card-body button:hover { background:rgb(255,157,45); color:#fff; letter-spacing:0.25em; }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <h1 class="logo"><span>Yasu</span>scator</h1>
+      <div class="nav"><a href="#">Obfuscator</a></div>
+      <div class="account"><div class="profile"></div></div>
+    </nav>
+    <form id="form">
+      <div class="card">
+        <div class="card-header"><h3>Obfuscator</h3></div>
+        <div class="card-body">
+          <div class="filescript">
+            <h3>Upload Your File Here!</h3>
+            <input type="file" id="file" accept=".lua,.txt" />
+            <label for="file">Select Script</label>
+            <div id="num-of-files">No File Chosen</div>
+            <h5>Only .lua or .txt files allowed</h5>
+          </div>
+          <div class="inputBox">
+            <input type="text" id="key" required />
+            <span>Encrypt Key</span>
+          </div>
+          <button type="submit" id="obfuscate">Obfuscate</button>
+        </div>
+      </div>
+    </form>
+    <script>
+      // Utility to XOR-encrypt a string with a key
+      function xorEncrypt(str, key) {
+        const out = [];
+        for (let i = 0; i < str.length; i++) {
+          out.push(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return out;
+      }// Build Lua decoder snippet
+  function makeLuaDecrypt(keyVar, arrVar) {
+    return `
 
-    .navbar {
-      width: 100%;
-      position: fixed;
-      top: 0;
-      background: #330000;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #009dff;
-      font-size: 1.5rem;
-      color: #009dff;
-      font-weight: bold;
-      z-index: 1000;
-    }
+local function decode(tbl, key) local out = {} for i=1,#tbl do local byte = tbl[i] local kv   = key:byte(((i-1) % #key) + 1) out[#out+1] = string.char(bit32.bxor(byte, kv)) end return table.concat(out) end
 
-    .card {
-      margin-top: 6rem;
-      background-color: rgba(255, 0, 0, 0.2);
-      border: 2px solid #009dff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 12px #009dff;
-    }
+local script = decode(${arrVar}, ${keyVar}) load(script)() `; }
 
-    label, h3, h5 {
-      color: white;
-    }
+const form = document.getElementById("form");
+  const fileInput = document.getElementById("file");
+  const fileLabel = document.getElementById("num-of-files");
+  const reader = new FileReader();
 
-    input[type="text"], input[type="file"] {
-      display: block;
-      margin: 1rem 0;
-      padding: 0.5rem;
-      width: 100%;
-      border-radius: 5px;
-      background-color: #440000;
-      color: white;
-      border: 1px solid #009dff;
-    }
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files[0];
+    if (f) fileLabel.textContent = `${f.name} (${(f.size/1024).toFixed(2)}Kb)`;
+  });
 
-    button {
-      padding: 0.7rem 2rem;
-      background-color: #009dff;
-      color: white;
-      font-size: 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const file = fileInput.files[0];
+    if (!file) return alert("Please upload a .lua or .txt file!");
+    const key = document.getElementById("key").value;
+    reader.readAsText(file);
 
-    button:hover {
-      background-color: #ff3333;
-    }
+    reader.onload = () => {
+      const src = reader.result;
+      const encArr = xorEncrypt(src, key);
+      const keyVar = "enc_key";
+      const arrVar = "enc_arr";
 
-    .file-info {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
-  </style>
-</head>
-<body>
-  <div class="navbar">A$$ OBFUSCATOR V0.01</div>
+      const lua = `--[[ OBFUSCATED BY REO OBFUSCATOR ]]--
 
-  <form id="form" class="card">
-    <h3>Upload Your File</h3>
-    <input type="file" id="file" />
-    <div class="file-info" id="num-of-files">No file chosen</div>
+local ${keyVar} = [[${key}]] local ${arrVar} = {${encArr.join(",")}}
 
-    <h3>Enter Encryption Key</h3>
-    <input type="text" id="key" required />
-    <h5>Only accepts .lua or .txt files</h5>
+${makeLuaDecrypt(keyVar, arrVar)}`;
 
-    <button type="submit" id="obfuscate">Obfuscate</button>
-  </form>
-
-  <script>
-    let realKey = "";
-    let leng = 128;
-    let k = 0;
-    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    let abcTab = [...abc];
-    let ran = Array.from({ length: 6 }, () =>
-      Array.from({ length: leng }, () =>
-        abcTab[Math.floor(Math.random() * abcTab.length)]
-      ).join("")
-    );
-
-    const xorE = (sc, key) => {
-      const tabel = [];
-      let k = 0;
-      for (let i = 0; i < sc.length; i++) {
-        let byteValue = sc.charCodeAt(i) + key.charCodeAt(k);
-        k++;
-        tabel.push(byteValue);
-        if (k == key.length) k = 0;
-      }
-      return tabel;
+const blob = new Blob([lua], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Encrypted_${file.name}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     };
+  });
+</script>
 
-    const fileInput = document.getElementById("file");
-    const fileInfo = document.getElementById("num-of-files");
-    const form = document.getElementById("form");
-    const read = new FileReader();
-
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (file && (file.name.endsWith(".lua") || file.name.endsWith(".txt"))) {
-        fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} Kb)`;
-      } else {
-        fileInfo.textContent = "Please upload only .lua or .txt file!";
-      }
-    });
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const file = fileInput.files[0];
-      const keys = document.getElementById("key").value;
-      if (!file || !keys) return alert("Upload a file and provide a key.");
-
-      for (let i = 0; i < keys.length; i++) {
-        realKey += "\\" + keys.charCodeAt(i);
-      }
-
-      read.readAsText(file);
-      read.onload = () => {
-        const sc = read.result;
-        const header = `--[[ OBFUSCATED BY A$$ OBFUSCATOR ]]--\n`;
-        const template = `local key=[[${keys}]];${ran[0]}z="--[[ OBFUSCATED BY A$$ OBFUSCATOR ]]--";${ran[1]}=${ran[0]};${ran[2]}=${ran[1]};${ran[3]}=${ran[2]};${ran[4]}=${ran[3]};${ran[5]}=${ran[4]};`;
-        const Output = header + template + JSON.stringify(xorE(sc, keys));
-        const blob = new Blob([Output], { type: "octet-stream" });
-        const href = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement("a"), {
-          href,
-          style: "display:none",
-          download: `Encrypted_${file.name}`,
-        });
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(href);
-      };
-    });
-  </script>
-</body>
-</html>
+  </body>
+  </html>
