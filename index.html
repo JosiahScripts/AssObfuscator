@@ -82,76 +82,67 @@
     <h5>Only accepts .lua or .txt files</h5>
     <button type="submit" id="obfuscate">Obfuscate</button>
   </form>
-
   <script>
     const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    const abcTab = [...abc];
-    const leng = 128;
+    const ran = Array.from({ length: 6 }, () =>
+      Array.from({ length: 128 }, () =>
+        abc[Math.floor(Math.random() * abc.length)]
+      ).join("")
+    );
 
-    // Build six random identifiers up front
-    const makeRand = () => Array.from({ length: leng }, () =>
-      abcTab[Math.floor(Math.random() * abcTab.length)]
-    ).join("");
-    const ran = Array.from({ length: 6 }, makeRand);
-
-    // XOR-encrypt: returns array of numbers
-    function xorE(sc, key) {
-      const out = [];
-      let ki = 0;
+    const xorE = (sc, key) => {
+      const table = [];
+      let k = 0;
       for (let i = 0; i < sc.length; i++) {
-        out.push(sc.charCodeAt(i) + key.charCodeAt(ki));
-        ki = (ki + 1) % key.length;
+        let byteValue = sc.charCodeAt(i) + key.charCodeAt(k);
+        k++;
+        table.push(byteValue);
+        if (k === key.length) k = 0;
       }
-      return out;
-    }
+      return table;
+    };
 
-    // Elements & reader
     const fileInput = document.getElementById("file");
-    const fileInfo  = document.getElementById("num-of-files");
-    const form      = document.getElementById("form");
-    const reader    = new FileReader();
+    const fileInfo = document.getElementById("num-of-files");
+    const form = document.getElementById("form");
+    const read = new FileReader();
 
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
       if (file && (file.name.endsWith(".lua") || file.name.endsWith(".txt"))) {
-        fileInfo.textContent = `${file.name} (${(file.size/1024).toFixed(2)} Kb)`;
+        fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} Kb)`;
       } else {
         fileInfo.textContent = "Please upload only .lua or .txt file!";
       }
     });
 
-    form.addEventListener("submit", e => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
       const file = fileInput.files[0];
-      const keys = document.getElementById("key").value;
-      if (!file || !keys) return alert("Upload a file and provide a key.");
+      const key = document.getElementById("key").value;
+      if (!file || !key) return alert("Upload a file and provide a key.");
+      read.readAsText(file);
+      read.onload = () => {
+        const sc = read.result;
+        const encrypted = xorE(sc, key);
+        const obfuscatedLua = `--[[ OBFUSCATED BY Reo Obfuscator ]]--
 
-      reader.readAsText(file);
-      reader.onload = () => {
-        const sc = reader.result;
-        const header = `--[[ OBFUSCATED BY Reo Obfuscator ]]--\n`;
-
-        // Build the decryption+loader stub
-        const loader = `
-local key = "${keys}"
-local data = ${JSON.stringify(xorE(sc, keys))}
-local buf = {}
-for i = 1, #data do
-  local b = data[i] - key:byte(((i-1) % #key) + 1)
-  buf[i] = string.char(b)
+local _Genv = _G or getfenv()
+local _junk1 = function(x,y) return (x^2 + y)%7 end
+local _rand = math.random(1, 999)
+local _bits = bit32 or bit
+local _xor = _bits.bxor or _bits.bitwise_xor
+local _tbl = {${encrypted.join(",")}}
+local _key = ${key}
+local _s = ""
+for _i,_v in ipairs(_tbl) do
+    _s = _s .. string.char(_xor(_v, _key))
 end
-local src = table.concat(buf)
-loadstring(src)()
-`;
+local _p = {("l");("oa");("d");("s");("tr");("ing")}
+local _fn = _Genv[ table.concat(_p) ] or load
+_fn(_s)`;
 
-        // Put it all together, with one random var declaration to throw off pattern scanners
-        const template =
-          header +
-          `local ${ran[0]} = "${keys}"\n` +
-          loader;
-
-        // Download the obfuscated script
-        const blob = new Blob([template], { type: "octet-stream" });
+        const blob = new Blob([obfuscatedLua], { type: "text/plain" });
         const href = URL.createObjectURL(blob);
         const a = Object.assign(document.createElement("a"), {
           href,
@@ -166,4 +157,4 @@ loadstring(src)()
     });
   </script>
 </body>
-</html>
+  </html>
