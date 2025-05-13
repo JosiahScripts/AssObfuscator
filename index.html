@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lua MoonSec-V3 Obfuscator</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    textarea, pre { width: 100%; box-sizing: border-box; }
+    textarea { height: 150px; }
+    pre { background: #f4f4f4; padding: .5rem; white-space: pre-wrap; word-wrap: break-word; }
+    button { padding: .5rem 1rem; font-size: 1rem; }
+    input[type=file] { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+<h1>Lua MoonSec-V3 Obfuscator</h1>
+
+<input type="file" id="fileInput" accept=".lua">
+<textarea id="codeArea" placeholder="Or paste Lua code here…"></textarea>
+<button onclick="obfuscate()">Obfuscate</button>
+<pre id="outputArea"></pre>
+
+<script>
+document.getElementById('fileInput').addEventListener('change',function(e){
+  var f=e.target.files[0],r=new FileReader();
+  r.onload=function(ev){
+    document.getElementById('codeArea').value=ev.target.result;
+  };
+  r.readAsText(f);
+});
+
+function obfuscate(){
+  var code=document.getElementById('codeArea').value;
+  if(!code){ alert('Please upload or paste some Lua code first.'); return; }
+  var hex='',i,c;
+  for(i=0;i<code.length;i++){
+    c=code.charCodeAt(i).toString(16);
+    hex+= c.length<2? '0'+c : c;
+  }
+  var loader=
+    'local function '..rnd()..'(s) local r=\"\" for i=1,#s,2 do r=r..string.char(tonumber(s:sub(i,i+1),16)) end return r end '..    
+    'local '..rnd()..'=loadstring or load '..    
+    rnd()..'('..rnd()..'("' + hex + '"))()';
+  document.getElementById('outputArea').innerText=loader;
+}
+
+function rnd(){
+  return '_' + Math.random().toString(36).substr(2,8);
+}
+</script>
+
+</body>
+  </html>
