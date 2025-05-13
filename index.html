@@ -36,95 +36,56 @@
   </div>
 
   <script>
-  // -- utils
   const rnd = () => '_' + Math.random().toString(36).substr(2,8);
-  function xorEncrypt(str, key) {
-    let out = '';
-    for(let i=0;i<str.length;i++){
-      out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    }
-    return btoa(out);
+  function hexEncode(str) {
+    return [...str].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
   }
-  function xorDecrypt(b64, key) {
-    let data = atob(b64), out = '';
-    for(let i=0;i<data.length;i++){
-      out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    }
-    return out;
+  function encryptStrings(code, key) {
+    return code.replace(/(["'])(.*?)(\1)/g, (_,q,s) => {
+      let out = '';
+      for(let i=0;i<s.length;i++){
+        let c = s.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        out += String.fromCharCode(c);
+      }
+      return q + '__STR__' + hexEncode(out) + '__END__' + q;
+    });
   }
-
-  // -- UI refs
   const fileInput = document.getElementById('fileInput'),
         inCode    = document.getElementById('inCode'),
         outCode   = document.getElementById('outCode'),
         btnObf    = document.getElementById('btnObf'),
         btnCopy   = document.getElementById('btnCopy'),
         btnDl     = document.getElementById('btnDl');
-
   fileInput.addEventListener('change', e => {
     let f = e.target.files[0]; if(!f) return;
     let r = new FileReader();
     r.onload = ev => inCode.value = ev.target.result;
     r.readAsText(f,'UTF-8');
   });
-
   btnObf.addEventListener('click', () => {
     let code = inCode.value;
-    if(!code.trim()) return alert('Provide Lua code first.');
-
-    // pick random encryption key
+    if(!code.trim()) return alert('Please provide Lua code.');
     const key = Math.random().toString(36).substr(2,8);
-
-    // encrypt all string literals: "...", '...'
-    code = code.replace(/(["'])(.*?)(\1)/g, (m, q, s) => {
-      return q + '__STR__' + xorEncrypt(s, key) + '__END__' + q;
-    });
-
-    // control-flow flattening: wrap real code in a table of blocks
-    let blocks = code.split('\n').map((ln,i)=>`${i}function(){${ln}}`);
-    let order = blocks.map((_,i)=>i).sort(()=>Math.random()-0.5);
-    let flat = `local _BLK={${blocks.join(',')}}\n` +
-               `local _ORD={${order.join(',')}}\n` +
-               `for i=1,#_ORD do _BLK[_ORD[i]]() end`;
-
-    // wrap, hex encode
-    let hex = [...flat].map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
-
-    // build loader parts
-    const dFn = rnd(), xFn = rnd(), j1 = rnd(), j2 = rnd();
-    let loader =
+    let core = encryptStrings(code, key);
+    const j1 = rnd(), j2 = rnd(), dFn = rnd(), xFn = rnd();
+    const loaderLua =
 `--[[OBFUSCATED BY A$$ OBFUSCATOR A.K.A Reo]]--
-
--- junk funcs (anti-static)
 local function ${j1}() return math.random() end
-local function ${j2}() for i=1,3 do end end
-
--- anti-debug
-pcall(function()
-  if debug then rawset(_G,'debug',nil) end
-  if getfenv then rawset(_G,'getfenv',nil) end
-end)
-
-local function ${dFn}(s)
-  local out=''
-  for i=1,#s,2 do
-    out = out..string.char(tonumber(s:sub(i,i+1),16))
-  end
-  return out
-end
-
+local function ${j2}(...) return ... end
+pcall(function() if debug then rawset(_G,'debug',nil) end if getfenv then rawset(_G,'getfenv',nil) end end)
+local function ${dFn}(h) local k="${key}" local out="" for i=1,#h-1,2 do local c=tonumber(h:sub(i,i+1),16) local kc=k:byte(((i+1)/2 - 1) % #k + 1) out=out..string.char(c ~ kc) end return out end
+local _hex = "${hexEncode(core)}"
+local _txt = "" for i=1,#_hex-1,2 do _txt=_txt..string.char(tonumber(_hex:sub(i,i+1),16)) end
+_txt=_txt:gsub("__STR__([0-9a-f]+)__END__", ${dFn})
 local ${xFn} = load or loadstring
-${xFn}(${dFn}("${hex}"))()`;
-
-    outCode.value = loader;
+${xFn}(_txt)()`;
+    outCode.value = loaderLua;
   });
-
   btnCopy.addEventListener('click', () => {
     if(!outCode.value) return;
     navigator.clipboard.writeText(outCode.value)
-      .then(()=>alert('Copied!')).catch(()=>alert('Fail.'));
+      .then(()=>alert('Copied!')).catch(()=>alert('Copy failed'));
   });
-
   btnDl.addEventListener('click', () => {
     if(!outCode.value) return;
     const blob=new Blob([outCode.value],{type:'text/plain'});
