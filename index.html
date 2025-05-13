@@ -1,252 +1,165 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A$$ OBFUSCATOR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A$$ OBFUSCATOR V0.01</title>
   <style>
-    /* Reset */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      display: flex; flex-direction: column; align-items: center;
-      font-family: Geneva, Verdana, sans-serif; background-color: #111;
-      color: #fff; min-height: 100vh; padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      margin: 0;
+      background-color: #220000; /* Dark red */
+      color: white;
     }
-    /* Header */
-    .header {
-      margin-bottom: 3rem;
-      text-align: center;
-    }
-    .header h1 {
-      font-size: 3rem; color: #f00;
-      text-shadow:
-        0 0 5px #f00,
-        0 0 10px #f00,
-        0 0 20px #0ff,
-        0 0 30px #0ff;
-      margin-bottom: 1rem;
-    }
-    .header p {
-      font-size: 1.2rem; color: #0ff;
-      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
-      margin-top: 0.5rem;
-    }
-    /* Card */
-    form { width: 100%; max-width: 600px; }
-    .card {
-      background: rgba(20,20,20,0.8);
-      border: 1px solid #0ff;
-      border-radius: 8px;
-      box-shadow: 
-        0 0 10px #f00,
-        0 0 20px #0ff;
-      overflow: hidden;
-    }
-    .card-header {
-      padding: 1.5rem;
-      text-align: center;
-      background: rgba(0,0,0,0.9);
-      border-bottom: 1px solid #f00;
-    }
-    .card-header h3 {
-      font-size: 2rem; color: #0ff;
-      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
-    }
-    .card-body {
-      padding: 2rem;
-      display: flex; flex-direction: column; gap: 1.5rem;
-    }
-    /* File Input */
-    .filescript h3 {
-      font-size: 1.1rem; color: #f00;
-      margin-bottom: 0.5rem;
-    }
-    .filescript label {
-      display: block; padding: 1rem; text-align: center;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid #0ff; border-radius: 4px;
-      box-shadow: 0 0 5px #0ff;
-      cursor: pointer; margin-bottom: 0.5rem;
-    }
-    .filescript label:hover {
-      background: rgba(0,255,255,0.2);
-      box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
-    }
-    #num-of-files {
-      font-size: 0.95rem; color: #ddd;
-      margin-bottom: 0.5rem;
-    }
-    /* Input Box */
-    .inputBox {
-      display: flex; flex-direction: column;
-    }
-    .inputBox span {
-      font-size: 0.9rem; color: #0ff;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 0 5px #0ff;
-    }
-    .inputBox input {
+
+    .navbar {
+      width: 100%;
+      position: fixed;
+      top: 0;
+      background: #330000;
       padding: 1rem;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid #f00;
-      border-radius: 4px;
-      font-size: 1rem; color: #fff;
-      box-shadow: 0 0 5px #f00;
+      text-align: center;
+      border-bottom: 2px solid #009dff;
+      font-size: 1.5rem;
+      color: #009dff;
+      font-weight: bold;
+      z-index: 1000;
     }
-    .inputBox input:focus {
-      outline: none; border-color: #0ff;
-      box-shadow: 0 0 10px #0ff;
+
+    .card {
+      margin-top: 6rem;
+      background-color: rgba(255, 0, 0, 0.2);
+      border: 2px solid #009dff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 12px #009dff;
     }
-    /* Button */
-    .card-body button {
-      padding: 1rem; font-size: 1.1rem;
-      background: #f00; color: #fff; border-radius: 4px;
-      border: 1px solid #0ff;
+
+    label, h3, h5 {
+      color: white;
+    }
+
+    input[type="text"], input[type="file"] {
+      display: block;
+      margin: 1rem 0;
+      padding: 0.5rem;
+      width: 100%;
+      border-radius: 5px;
+      background-color: #440000;
+      color: white;
+      border: 1px solid #009dff;
+    }
+
+    button {
+      padding: 0.7rem 2rem;
+      background-color: #009dff;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      box-shadow: 0 0 10px #f00, 0 0 20px #0ff;
-      transition: transform 0.2s;
+      transition: background-color 0.3s ease;
     }
-    .card-body button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px #f00, 0 0 30px #0ff;
+
+    button:hover {
+      background-color: #ff3333;
+    }
+
+    .file-info {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>A$$ OBFUSCATOR</h1>
-    <p>Secure your Lua scripts with a click</p>
-  </div>
-  <form id="form">
-    <div class="card">
-      <div class="card-header">
-        <h3>Obfuscate Your Script</h3>
-      </div>
-      <div class="card-body">
-        <div class="filescript">
-          <h3>Upload Your File</h3>
-          <input type="file" id="file" accept=".lua,.txt" />
-          <label for="file">Select Script</label>
-          <div id="num-of-files">No file chosen</div>
-          <h5 style="color:#aaa; font-size:0.8rem; margin-top:0.5rem;">Only .lua or .txt files</h5>
-        </div>
-        <div class="inputBox">
-          <span>Encryption Key</span>
-          <input type="text" required id="key" placeholder="Enter key here" />
-        </div>
-        <button type="submit" id="obfuscate">Obfuscate</button>
-      </div>
-    </div>
+  <div class="navbar">A$$ OBFUSCATOR V0.01</div>
+
+  <form id="form" class="card">
+    <h3>Upload Your File</h3>
+    <input type="file" id="file" />
+    <div class="file-info" id="num-of-files">No file chosen</div>
+
+    <h3>Enter Encryption Key</h3>
+    <input type="text" id="key" required />
+    <h5>Only accepts .lua or .txt files</h5>
+
+    <button type="submit" id="obfuscate">Obfuscate</button>
   </form>
+
   <script>
-    // Configuration
     let realKey = "";
+    let leng = 128;
+    let k = 0;
     const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    let abcTab = [];
-    for (let i = 0; i < abc.length; i++) abcTab[i] = abc[i];// Generate random strings
-const leng = 128;
-let ran1 = "", ran2 = "", ran3 = "", ran4 = "", ran5 = "", ran6 = "";
-for (let i = 0; i < leng; i++) {
-  ran1 += abcTab[Math.floor(Math.random() * abcTab.length)];
-  ran2 += abcTab[Math.floor(Math.random() * abcTab.length)];
-  ran3 += abcTab[Math.floor(Math.random() * abcTab.length)];
-  ran4 += abcTab[Math.floor(Math.random() * abcTab.length)];
-  ran5 += abcTab[Math.floor(Math.random() * abcTab.length)];
-  ran6 += abcTab[Math.floor(Math.random() * abcTab.length)];
-}
+    let abcTab = [...abc];
+    let ran = Array.from({ length: 6 }, () =>
+      Array.from({ length: leng }, () =>
+        abcTab[Math.floor(Math.random() * abcTab.length)]
+      ).join("")
+    );
 
-// XOR encryption
-const xorE = (sc, key) => {
-  const tabel = [];
-  let k = 0;
-  for (let i = 0; i < sc.length; i++) {
-    let byteValue = sc.charCodeAt(i) + key.charCodeAt(k);
-    tabel.push(byteValue);
-    k = (k + 1) % key.length;
-  }
-  return tabel;
-};
+    const xorE = (sc, key) => {
+      const tabel = [];
+      let k = 0;
+      for (let i = 0; i < sc.length; i++) {
+        let byteValue = sc.charCodeAt(i) + key.charCodeAt(k);
+        k++;
+        tabel.push(byteValue);
+        if (k == key.length) k = 0;
+      }
+      return tabel;
+    };
 
-// Alibi function
-const alibi = (v1, v2, v3, tab) => {
-  return `_ENV={string=string,table=table,math=math,pairs=pairs,load=load,print=print};` +
-         `${v1}="${v2}";${v2}="${v1}";${v3}={${tab}};` +
-         `function xor(t)local c="";for i=1,#${v2} do local b=string.byte(${v2},i);local q=string.byte(${v1},(i-1)%#${v1}+1);` +
-         `c=c..string.char(bit.bxor(b,q));end;return c;end;bit={bxor=function(a,b)local r=0,m=1;` +
-         `while a>0 and b>0 do local aa,bb=a%2,b%2;r=r+m*((aa+bb)%2);m=m*2;a=math.floor(a/2);b=math.floor(b/2);end;` +
-         `if a>0 then r=r+m*a end;if b>0 then r=r+m*b end;return r;end};xor(${v3})${ran1}z="Encrypt By Yasu";`;
-};
+    const fileInput = document.getElementById("file");
+    const fileInfo = document.getElementById("num-of-files");
+    const form = document.getElementById("form");
+    const read = new FileReader();
 
-// Decryption wrapper
-const decX = (tabel) => {
-  let script = ran3;
-  let keyLen = ran4;
-  let a = ran1;
-  let b = ran2;
-  let out = ran5;
-  return `${script}={${tabel.join()}};${keyLen}=0;${out}='';for ${a},${b} in pairs(${script}) do ` +
-         `${keyLen}=${keyLen}+1;` +
-         `${out}=${out}.._ENV[string.char]([tabel[${a}] - _ENV[string.byte](${key}, ${keyLen})]);` +
-         `if ${keyLen}==#${key} then ${keyLen}=0;end;end;` +
-         `if ${ran1}z=="\69\110\99\114\121\112\116\32\66\121\32\89\97\115\117" then ` +
-         `_ENV.load(${out})() else print("Error while running code");end;`;
-};
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (file && (file.name.endsWith(".lua") || file.name.endsWith(".txt"))) {
+        fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} Kb)`;
+      } else {
+        fileInfo.textContent = "Please upload only .lua or .txt file!";
+      }
+    });
 
-// File handling
-const fileInput = document.getElementById("file");
-const fileChoosen = document.getElementById("num-of-files");
-const read = new FileReader();
-fileInput.addEventListener("change", () => {
-  const f = fileInput.files[0];
-  if (!f) return;
-  fileChoosen.textContent = `${f.name} (${(f.size/1024).toFixed(2)} KB)`;
-});
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      const keys = document.getElementById("key").value;
+      if (!file || !keys) return alert("Upload a file and provide a key.");
 
-document.getElementById("form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const f = fileInput.files[0];
-  if (!f) return alert("Please upload a file first!");
-  const key = document.getElementById("key").value;
-  realKey = "";
-  for (let i = 0; i < key.length; i++) realKey += "\\" + key.charCodeAt(i);
+      for (let i = 0; i < keys.length; i++) {
+        realKey += "\\" + keys.charCodeAt(i);
+      }
 
-  read.readAsText(f);
-  read.onload = () => {
-    const sc = read.result;
-    const template = `local key=[[${key}]];${ran1}z="Encrypt By Yasu";${ran2}=${ran1};${ran3}=${ran2};` +
-                     `${ran4}=${ran3};${ran5}=${ran4};${ran6}=${ran5};`;
-    let tab1 = [], tab2 = [], tab3 = [], tab4 = [], tab5 = [], tab6 = [];
-    for (let i = 0; i < leng; i++) {
-      tab1[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-      tab2[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-      tab3[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-      tab4[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-      tab5[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-      tab6[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
-    }
-    const out = template +
-                alibi(ran1, ran2, ran3, tab1.join()) +
-                alibi(ran4, ran2, ran5, tab2.join()) +
-                alibi(ran6, ran3, ran1, tab3.join()) +
-                decX(xorE(sc, key)) +
-                alibi(ran2, ran4, ran6, tab4.join()) +
-                alibi(ran1, ran4, ran5, tab5.join()) +
-                alibi(ran2, ran1, ran3, tab6.join());
-
-    // Create a File object for download
-    const fileObj = new File([out], `Obfuscated_${f.name}`, { type: "application/octet-stream" });
-    const url = URL.createObjectURL(fileObj);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileObj.name;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(url);
-    a.remove();
-  };
-});
-
+      read.readAsText(file);
+      read.onload = () => {
+        const sc = read.result;
+        const header = `--[[ OBFUSCATED BY A$$ OBFUSCATOR ]]--\n`;
+        const template = `local key=[[${keys}]];${ran[0]}z="--[[ OBFUSCATED BY A$$ OBFUSCATOR ]]--";${ran[1]}=${ran[0]};${ran[2]}=${ran[1]};${ran[3]}=${ran[2]};${ran[4]}=${ran[3]};${ran[5]}=${ran[4]};`;
+        const Output = header + template + JSON.stringify(xorE(sc, keys));
+        const blob = new Blob([Output], { type: "octet-stream" });
+        const href = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement("a"), {
+          href,
+          style: "display:none",
+          download: `Encrypted_${file.name}`,
+        });
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(href);
+      };
+    });
   </script>
 </body>
-  </html>
+</html>
