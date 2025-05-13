@@ -1,213 +1,249 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Neon Lua Obfuscator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A$$ OBFUSCATOR</title>
   <style>
-    :root {
-      --bg: #0d0d0d;
-      --card-bg: #1a1a1a;
-      --neon-pink: #ff007f;
-      --neon-cyan: #00ffff;
-      --text: #e0e0e0;
-      --shadow-pink: rgba(255, 0, 127, 0.6);
-      --shadow-cyan: rgba(0, 255, 255, 0.6);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+      font-family: Geneva, Verdana, sans-serif; background-color: #111;
+      color: #fff; min-height: 100vh; padding: 2rem;
     }
-    .container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 600px;
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow:
-        0 0 10px var(--shadow-cyan),
-        0 0 20px var(--shadow-pink);
-    }
-    h1 {
-      font-size: 1.8rem;
+    /* Header */
+    .header {
+      margin-bottom: 3rem;
       text-align: center;
-      color: var(--neon-cyan);
-      text-shadow: 0 0 8px var(--shadow-cyan);
-      margin-bottom: 10px;
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
+    .header h1 {
+      font-size: 3rem; color: #f00;
+      text-shadow:
+        0 0 5px #f00,
+        0 0 10px #f00,
+        0 0 20px #0ff,
+        0 0 30px #0ff;
+      margin-bottom: 1rem;
     }
-    input[type="file"],
-    textarea {
-      width: 100%;
-      background: #111;
-      color: var(--text);
-      border: none;
-      border-radius: 6px;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 1rem;
-      box-shadow: inset 2px 2px 5px #000, inset -2px -2px 5px #222;
+    .header p {
+      font-size: 1.2rem; color: #0ff;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+      margin-top: 0.5rem;
     }
-    textarea {
-      height: 180px;
-      resize: vertical;
+    /* Card */
+    form { width: 100%; max-width: 600px; }
+    .card {
+      background: rgba(20,20,20,0.8);
+      border: 1px solid #0ff;
+      border-radius: 8px;
+      box-shadow: 
+        0 0 10px #f00,
+        0 0 20px #0ff;
+      overflow: hidden;
     }
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
+    .card-header {
+      padding: 1.5rem;
+      text-align: center;
+      background: rgba(0,0,0,0.9);
+      border-bottom: 1px solid #f00;
     }
-    button {
-      flex: 1 1 auto;
-      padding: 12px;
-      background: var(--neon-pink);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
+    .card-header h3 {
+      font-size: 2rem; color: #0ff;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+    }
+    .card-body {
+      padding: 2rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    /* File Input */
+    .filescript h3 {
+      font-size: 1.1rem; color: #f00;
+      margin-bottom: 0.5rem;
+    }
+    .filescript label {
+      display: block; padding: 1rem; text-align: center;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid #0ff; border-radius: 4px;
+      box-shadow: 0 0 5px #0ff;
+      cursor: pointer; margin-bottom: 0.5rem;
+    }
+    .filescript label:hover {
+      background: rgba(0,255,255,0.2);
+      box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+    }
+    #num-of-files {
+      font-size: 0.95rem; color: #ddd;
+      margin-bottom: 0.5rem;
+    }
+    /* Input Box */
+    .inputBox {
+      display: flex; flex-direction: column;
+    }
+    .inputBox span {
+      font-size: 0.9rem; color: #0ff;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 5px #0ff;
+    }
+    .inputBox input {
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid #f00;
+      border-radius: 4px;
+      font-size: 1rem; color: #fff;
+      box-shadow: 0 0 5px #f00;
+    }
+    .inputBox input:focus {
+      outline: none; border-color: #0ff;
+      box-shadow: 0 0 10px #0ff;
+    }
+    /* Button */
+    .card-body button {
+      padding: 1rem; font-size: 1.1rem;
+      background: #f00; color: #fff; border-radius: 4px;
+      border: 1px solid #0ff;
       cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: 0 0 8px var(--shadow-pink);
-      transition: transform 0.1s;
+      box-shadow: 0 0 10px #f00, 0 0 20px #0ff;
+      transition: transform 0.2s;
     }
-    button:active {
-      transform: translateY(2px);
-      box-shadow: 0 0 4px var(--shadow-pink);
-    }
-    @media (max-width: 480px) {
-      h1 { font-size: 1.5rem; }
-      button { padding: 10px; font-size: 0.9rem; }
+    .card-body button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #f00, 0 0 30px #0ff;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>Neon Lua Obfuscator</h1>
-      <label for="fileInput">Upload .lua File</label>
-      <input type="file" id="fileInput" accept=".lua">
-      <label for="input">Or Paste Lua Code</label>
-      <textarea id="input" placeholder="Enter or paste Lua code here..."></textarea>
-      <div class="actions">
-        <button id="obfuscate">Obfuscate Code</button>
-      </div>
-    </div>
-    <div class="card">
-      <h1>Obfuscated Output</h1>
-      <textarea id="output" readonly placeholder="Your obfuscated code will appear here..."></textarea>
-      <div class="actions">
-        <button id="copyBtn">Copy</button>
-        <button id="downloadBtn">Download .lua</button>
-      </div>
-    </div>
+  <div class="header">
+    <h1>A$$ OBFUSCATOR</h1>
+    <p>Secure your Lua scripts with a click</p>
   </div>
-
+  <form id="form">
+    <div class="card">
+      <div class="card-header">
+        <h3>Obfuscate Your Script</h3>
+      </div>
+      <div class="card-body">
+        <div class="filescript">
+          <h3>Upload Your File</h3>
+          <input type="file" id="file" accept=".lua,.txt" />
+          <label for="file">Select Script</label>
+          <div id="num-of-files">No file chosen</div>
+          <h5 style="color:#aaa; font-size:0.8rem; margin-top:0.5rem;">Only .lua or .txt files</h5>
+        </div>
+        <div class="inputBox">
+          <span>Encryption Key</span>
+          <input type="text" required id="key" placeholder="Enter key here" />
+        </div>
+        <button type="submit" id="obfuscate">Obfuscate</button>
+      </div>
+    </div>
+  </form>
   <script>
-    // File upload
-    document.getElementById('fileInput').addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (!f || !f.name.endsWith('.lua')) return alert('Select a .lua file.');
-      const r = new FileReader();
-      r.onload = evt => document.getElementById('input').value = evt.target.result;
-      r.readAsText(f);
-    });
-
-    // Obfuscate
-    document.getElementById('obfuscate').addEventListener('click', () => {
-      const userCode = document.getElementById('input').value;
-      if (!userCode.trim()) return alert('Please provide Lua code.');
-
-      const safeCode = userCode.replace(/]]/g, ']].."]]..[[');
-
-      const obf = \`local settings = {
-    normalobfus = false,
-    hardobfus   = false
+    // Configuration
+    let realKey = "";
+    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let abcTab = [];
+    for (let i = 0; i < abc.length; i++) abcTab[i] = abc[i];// Generate random strings
+const leng = 128;
+let ran1 = "", ran2 = "", ran3 = "", ran4 = "", ran5 = "", ran6 = "";
+for (let i = 0; i < leng; i++) {
+  ran1 += abcTab[Math.floor(Math.random() * abcTab.length)];
+  ran2 += abcTab[Math.floor(Math.random() * abcTab.length)];
+  ran3 += abcTab[Math.floor(Math.random() * abcTab.length)];
+  ran4 += abcTab[Math.floor(Math.random() * abcTab.length)];
+  ran5 += abcTab[Math.floor(Math.random() * abcTab.length)];
+  ran6 += abcTab[Math.floor(Math.random() * abcTab.length)];
 }
-local a=[[\${safeCode}]]
 
-if settings.normalobfus == false and settings.hardobfus == false then
-    print('no option selected, choosing normal mode and obfuscating...')
-    a="--// Decompiled Code. \n"..a;
-    function Obfuscate(b)
-        local c="function IllIlllIllIlllIlllIlllIll(IllIlllIllIllIll) if (IllIlllIllIllIll==(((((919 + 636)-636)*3147)/3147)+919)) then return not true end if (IllIlllIllIllIll==(((((968 + 670)-670)*3315)/3315)+968)) then return not false end end; "
-        local d=c; local e=""
-        local f={"IllIllIllIllI","IIlllIIlllIIlllIIlllII","IIllllIIllll"}
-        local g=[[local IlIlIlIlIlIlIlIlII = {]]
-        local h=[[local IllIIllIIllIII = loadstring]]
-        local i=[[local IllIIIllIIIIllI = table.concat]]
-        for n=1,string.len(b) do e=e.."'\"..string.byte(b,n).."'," end
-        local function rnd() return f[math.random(1,#f)] end
-        local k="local "..rnd().." = (7*3-9/9+3*2/0+3*3);"
-        local l="local "..rnd().." = (3*4-7/7+6*4/3+9*9);"
-        local m="--// Protected by Wth1Q\n\n"
-        local o="function IllIIIIllIIIIIl("..rnd()..")"
-        local p="function "..rnd().."("..rnd()..")"
-        local q="local "..rnd().." = (5*3-2/8+9*2/9+8*3)"
-        local r="end"
-        local s="IllIIIIllIIIIIl(900283)"
-        local t="function IllIlllIllIlllIlllIlllIllIlllIIIlll("..rnd()..")"
-        local u="local "..rnd().." = (9*0-7/5+3*1/3+8*2)"
-        local v="end"
-        local w="IllIlllIllIlllIlllIlllIllIlllIIIlll(9083)"
-        local x=m..d..k..l..i..";"..o.." "..p.." "..q.." "..r.." "..r.." "..r..";"..s..";"..t.." "..p.." "..u.." "..v.." "..v..";"..w..";"..h..";"..g..e.."}"..
-                "IllIIllIIllIII(IllIIIllIIIIllI(IlIlIlIlIlIlIlIlII,IIIIIIIIllllllllIIIIIIII))()"
-        print(x)
-    end
-    do Obfuscate(a) end
+// XOR encryption
+const xorE = (sc, key) => {
+  const tabel = [];
+  let k = 0;
+  for (let i = 0; i < sc.length; i++) {
+    let byteValue = sc.charCodeAt(i) + key.charCodeAt(k);
+    tabel.push(byteValue);
+    k = (k + 1) % key.length;
+  }
+  return tabel;
+};
 
-elseif settings.normalobfus == true and settings.hardobfus == false then
-    print('Normal mode selected, Obfuscating!')
-    -- duplicate above or adjust as needed
-    do Obfuscate(a) end
+// Alibi function
+const alibi = (v1, v2, v3, tab) => {
+  return `_ENV={string=string,table=table,math=math,pairs=pairs,load=load,print=print};` +
+         `${v1}="${v2}";${v2}="${v1}";${v3}={${tab}};` +
+         `function xor(t)local c="";for i=1,#${v2} do local b=string.byte(${v2},i);local q=string.byte(${v1},(i-1)%#${v1}+1);` +
+         `c=c..string.char(bit.bxor(b,q));end;return c;end;bit={bxor=function(a,b)local r=0,m=1;` +
+         `while a>0 and b>0 do local aa,bb=a%2,b%2;r=r+m*((aa+bb)%2);m=m*2;a=math.floor(a/2);b=math.floor(b/2);end;` +
+         `if a>0 then r=r+m*a end;if b>0 then r=r+m*b end;return r;end};xor(${v3})${ran1}z="Encrypt By Yasu";`;
+};
 
-elseif settings.normalobfus == false and settings.hardobfus == true then
-    print('Hard mode selected, Obfuscating!')
-    -- hard variant here
-    do Obfuscate(a) end
-end\`;
+// Decryption wrapper
+const decX = (tabel) => {
+  let script = ran3;
+  let keyLen = ran4;
+  let a = ran1;
+  let b = ran2;
+  let out = ran5;
+  return `${script}={${tabel.join()}};${keyLen}=0;${out}='';for ${a},${b} in pairs(${script}) do ` +
+         `${keyLen}=${keyLen}+1;` +
+         `${out}=${out}.._ENV[string.char]([tabel[${a}] - _ENV[string.byte](${key}, ${keyLen})]);` +
+         `if ${keyLen}==#${key} then ${keyLen}=0;end;end;` +
+         `if ${ran1}z=="\69\110\99\114\121\112\116\32\66\121\32\89\97\115\117" then ` +
+         `_ENV.load(${out})() else print("Error while running code");end;`;
+};
 
-      document.getElementById('output').value = obf;
-    });
+// File handling
+const fileInput = document.getElementById("file");
+const fileChoosen = document.getElementById("num-of-files");
+const read = new FileReader();
+fileInput.addEventListener("change", () => {
+  const f = fileInput.files[0];
+  if (!f) return;
+  fileChoosen.textContent = `${f.name} (${(f.size/1024).toFixed(2)} KB)`;
+});
 
-    // Copy
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      const out = document.getElementById('output');
-      if (!out.value) return;
-      navigator.clipboard.writeText(out.value)
-        .then(() => alert('Copied!'))
-        .catch(() => { out.select(); document.execCommand('copy'); alert('Copied!'); });
-    });
+document.getElementById("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const f = fileInput.files[0];
+  if (!f) return alert("Please upload a file first!");
+  const key = document.getElementById("key").value;
+  realKey = "";
+  for (let i = 0; i < key.length; i++) realKey += "\\" + key.charCodeAt(i);
 
-    // Download
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      const text = document.getElementById('output').value;
-      if (!text) return;
-      const blob = new Blob([text], { type: 'text/plain' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
-      a.download = 'obfuscated.lua';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
+  read.readAsText(f);
+  read.onload = () => {
+    const sc = read.result;
+    const template = `local key=[[${key}]];${ran1}z="Encrypt By Yasu";${ran2}=${ran1};${ran3}=${ran2};` +
+                     `${ran4}=${ran3};${ran5}=${ran4};${ran6}=${ran5};`;
+    let tab1 = [], tab2 = [], tab3 = [], tab4 = [], tab5 = [], tab6 = [];
+    for (let i = 0; i < leng; i++) {
+      tab1[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+      tab2[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+      tab3[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+      tab4[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+      tab5[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+      tab6[i] = abcTab[Math.floor(Math.random()*abcTab.length)].charCodeAt(0);
+    }
+    const out = template +
+                alibi(ran1, ran2, ran3, tab1.join()) +
+                alibi(ran4, ran2, ran5, tab2.join()) +
+                alibi(ran6, ran3, ran1, tab3.join()) +
+                decX(xorE(sc, key)) +
+                alibi(ran2, ran4, ran6, tab4.join()) +
+                alibi(ran1, ran4, ran5, tab5.join()) +
+                alibi(ran2, ran1, ran3, tab6.join());
+    const blob = new Blob([out], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `Obfuscated_${f.name}`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  };
+});
+
   </script>
 </body>
-</html>
+  </html>
