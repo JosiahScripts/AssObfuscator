@@ -232,10 +232,13 @@ document.getElementById("form").addEventListener("submit", (e) => {
                 alibi(ran2, ran4, ran6, tab4.join()) +
                 alibi(ran1, ran4, ran5, tab5.join()) +
                 alibi(ran2, ran1, ran3, tab6.join());
-    const blob = new Blob([out], { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
+
+    // Create a File object for download
+    const fileObj = new File([out], `Obfuscated_${f.name}`, { type: "application/octet-stream" });
+    const url = URL.createObjectURL(fileObj);
     const a = document.createElement("a");
-    a.href = url; a.download = `Obfuscated_${f.name}`;
+    a.href = url;
+    a.download = fileObj.name;
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
