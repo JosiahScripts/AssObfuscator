@@ -6,85 +6,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Reo Obfuscator V0.07</title>
   <style>
-    body{display:flex;flex-direction:column;align-items:center;
-      justify-content:center;font-family:Arial,sans-serif;
-      height:100vh;margin:0;background:#220000;color:#fff}
-    .navbar{position:fixed;top:0;width:100%;background:#330000;
-      padding:1rem;text-align:center;border-bottom:2px solid #009dff;
-      font-size:1.5rem;color:#009dff;font-weight:bold;z-index:1000}
-    .card{margin-top:6rem;background:rgba(255,0,0,0.2);
-      border:2px solid #009dff;padding:2rem;border-radius:10px;
-      box-shadow:0 0 12px #009dff}
-    input,button,h3,h5{color:#fff}
-    input[type=file],input[type=text]{display:block;margin:1rem 0;
-      padding:.5rem;width:100%;border-radius:5px;background:#440000;
-      border:1px solid #009dff}
-    button{padding:.7rem 2rem;background:#009dff;border:none;
-      border-radius:5px;cursor:pointer;transition:.3s}
-    button:hover{background:#ff3333}
-    .file-info{margin-top:.5rem;font-size:.9rem;color:#ccc}
+    body {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; font-family: Arial, sans-serif;
+      height: 100vh; margin: 0; background: #220000; color: #fff;
+    }
+    .navbar {
+      position: fixed; top: 0; width: 100%; background: #330000;
+      padding: 1rem; text-align: center; border-bottom: 2px solid #009dff;
+      font-size: 1.5rem; color: #009dff; font-weight: bold; z-index: 1000;
+    }
+    .card {
+      margin-top: 6rem; background: rgba(255,0,0,0.2);
+      border: 2px solid #009dff; padding: 2rem; border-radius: 10px;
+      box-shadow: 0 0 12px #009dff;
+    }
+    input, button, h3, h5 { color: #fff; }
+    input[type=file], input[type=text] {
+      display: block; margin: 1rem 0; padding: .5rem; width: 100%;
+      border-radius: 5px; background: #440000; border: 1px solid #009dff;
+    }
+    button {
+      padding: .7rem 2rem; background: #009dff; border: none;
+      border-radius: 5px; cursor: pointer; transition: .3s;
+    }
+    button:hover { background: #ff3333; }
+    .file-info { margin-top: .5rem; font-size: .9rem; color: #ccc; }
   </style>
 </head>
 <body>
   <div class="navbar">Reo Obfuscator V0.07</div>
   <form id="F0" class="card">
     <h3>Upload .lua/.txt</h3>
-    <input type="file" id="F1">
+    <input type="file" id="F1" />
     <div id="F2" class="file-info">No file chosen</div>
     <h3>Key</h3>
-    <input type="text" id="F3" required>
+    <input type="text" id="F3" required />
     <h5>Enter any key</h5>
     <button type="submit">Obfuscate</button>
   </form>
   <script>
-    const A=F1=document.getElementById('F1'),
-          B=F2=document.getElementById('F2'),
-          C=F0=document.getElementById('F0');
-    const R=new FileReader();
-    A.addEventListener('change',()=>{let f=A.files[0];
-      B.textContent=f?`${f.name} (${(f.size/1024).toFixed(2)}KB)`:'No file chosen'});
-    function X(s,k){
-      let o=[],c=k.charCodeAt(0);
-      for(let i=0;i<s.length;i++){
-        let b=s.charCodeAt(i)^c;
-        o.push(b);
-        c=(c+b)&0xFF;
-      }
-      return o;
-    }
-    C.addEventListener('submit',e=>{
-      e.preventDefault();
-      let f=A.files[0], k=F3.value;
-      if(!f||!k)return alert('File & key required');
-      R.readAsText(f);
+    const fileInput = document.getElementById('F1');
+    const fileInfo = document.getElementById('F2');
+    const form = document.getElementById('F0');
+    const keyInput = document.getElementById('F3');
+    const reader = new FileReader();
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      fileInfo.textContent = file ? `${file.name} (${(file.size / 1024).toFixed(2)}KB)` : 'No file chosen';
     });
-    R.onload=()=>{
-      let src=R.result, k=F3.value,
-          seed=src.length^k.length,
-          enc=X(src,k),
-          parts=[[],[],[]];
-      enc.forEach((v,i)=>parts[i%3].push(v));
-      parts.forEach(p=>p.sort(()=>Math.random()-.5));
-      let tbls=parts.map((p,i)=>`local T${i}={${p.join(',')}}`).join('\\n');
-      let stub=`--[[ OBFUSCATED BY Reo Obfuscator ]]\\n`+
-        `local g=_G or getfenv()\\n`+
-        `local h=debug.gethook and debug.gethook() or nil if h then pcall(debug.sethook,nil) end\\n`+
-        `local s=debug.getinfo and debug.getinfo(1).source or''\\n`+
-        `local K=#s+${k.length}\\n`+
-        `local xor=bit32 and bit32.bxor or (bit and bit.bitwise_xor) or function(a,b)return a~b end\\n`+
-        tbls+`\\nlocal M={}for i=0,2 do for _,v in ipairs(_G['T'..i])do table.insert(M,v)end end\\n`+
-        `for i=1,200 do if(i*17)%5==3 then end end if wait then wait(0.005) end\\n`+
-        `local O=''for _,v in ipairs(M)do O=O..string.char(xor(v,K))end\\n`+
-        `K=K~0xAA\\n`+
-        `local D={[1]=function()pcall(load,O)end,[2]=function()load(O)end}\\n`+
-        `D[math.random(1,2)]()\\n`;
-      let blob=new Blob([stub],{type:'text/plain'}),
-          url=URL.createObjectURL(blob),
-          a=document.createElement('a');
-      a.href=url; a.download=`Encrypted_${f.name}`;
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-    };
+
+    function xorEncode(str, key) {
+      const out = [];
+      let c = key.charCodeAt(0);
+      for (let i = 0; i < str.length; i++) {
+        const b = str.charCodeAt(i) ^ c;
+        out.push(b);
+        c = (c + b) & 0xFF;
+      }
+      return out;
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      const key = keyInput.value;
+      if (!file || !key) return alert('File & key required');
+      reader.readAsText(file);
+      reader.onload = () => {
+        const src = reader.result;
+        const seed = src.length ^ key.length;
+        const enc = xorEncode(src, key);
+        const parts = [[], [], []];
+        enc.forEach((v, i) => parts[i % 3].push(v));
+        parts.forEach(p => p.sort(() => Math.random() - 0.5));
+        const tables = parts.map((p, i) => `local T${i}={${p.join(',')}}`).join('\n');
+        const stub = `--[[ OBFUSCATED BY Reo Obfuscator ]]\n` +
+          `local g=_G or getfenv()\n` +
+          `local h=debug.gethook and debug.gethook() or nil if h then pcall(debug.sethook,nil) end\n` +
+          `local s=debug.getinfo and debug.getinfo(1).source or''\n` +
+          `local K=#s+${key.length}\n` +
+          `local xor=bit32 and bit32.bxor or (bit and bit.bitwise_xor) or function(a,b)return a~b end\n` +
+          tables + `\nlocal M={}for i=0,2 do for _,v in ipairs(_G['T'..i])do table.insert(M,v)end end\n` +
+          `for i=1,200 do if(i*17)%5==3 then end end if wait then wait(0.005) end\n` +
+          `local O=''for _,v in ipairs(M)do O=O..string.char(xor(v,K))end\n` +
+          `K=K~0xAA\n` +
+          `local D={[1]=function()pcall(load,O)end,[2]=function()load(O)end}\n` +
+          `D[math.random(1,2)]()\n`;
+
+        const blob = new Blob([stub], { type: 'text/plain' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `Encrypted_${file.name}`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(downloadUrl);
+          document.body.removeChild(a);
+        }, 100);
+      };
+    });
   </script>
 </body>
 </html>
