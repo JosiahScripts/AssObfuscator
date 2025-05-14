@@ -1,111 +1,127 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>REO Obfuscator</title>
-<style>
-  .mode-btn { background-color: red; color: white; padding: 8px 16px; margin: 5px; border: none; cursor: pointer; }
-  .mode-btn.selected { background-color: green; }
-  #obfuscateBtn { background-color: #007BFF; color: white; padding: 8px 16px; margin: 5px; border: none; cursor: pointer; }
-  #codeInput { width: 90%; height: 200px; margin-top: 10px; font-family: monospace; }
-</style>
+  <meta charset="UTF-8">
+  <title>Lua Obfuscator</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 200px; margin-bottom: 10px; font-family: monospace; }
+    button { padding: 10px; font-size: 16px; }
+  </style>
 </head>
 <body>
-<h1>REO Obfuscator</h1>
-<button id="normalBtn" class="mode-btn">Normal Mode</button>
-<button id="hardBtn" class="mode-btn">Hard Mode</button><br>
-<input type="file" id="fileInput" accept=".lua"><br>
-<textarea id="codeInput" placeholder="Paste your Lua code here"></textarea><br>
-<button id="obfuscateBtn">Obfuscate</button>
-<script>
-function getRandomName(existing) {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  const chars = letters + '0123456789_';
-  const reserved = ['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','load','loadstring','string','table','concat','char'];
-  let name;
-  do {
-    const len = 5 + Math.floor(Math.random() * 4);
-    name = letters.charAt(Math.random() * letters.length | 0);
-    for (let i = 1; i < len; i++) name += chars.charAt(Math.random() * chars.length | 0);
-  } while (existing.includes(name) || reserved.includes(name.toLowerCase()));
-  existing.push(name);
-  return name;
-}
+  <h1>Lua Obfuscator (Client-side)</h1>
+  <textarea id="inputLua" placeholder="Enter Lua source code here"></textarea>
+  <button id="obfuscateBtn">Obfuscate & Download</button>
+  <textarea id="outputLua" readonly placeholder="Obfuscated Lua code will appear here"></textarea>
 
-const normalBtn = document.getElementById('normalBtn'),
-      hardBtn = document.getElementById('hardBtn'),
-      fileInput = document.getElementById('fileInput'),
-      codeInput = document.getElementById('codeInput'),
-      obfuscateBtn = document.getElementById('obfuscateBtn');
-let mode = null;
+  <script>
+    // Random name generator for obfuscated identifiers
+    function randName(len) {
+      len = len || Math.floor(Math.random()*5 + 3);
+      let s = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      let result = s.charAt(Math.floor(Math.random()*s.length));
+      s += '0123456789_';
+      for (let i=1; i<len; i++) {
+        result += s.charAt(Math.floor(Math.random()*s.length));
+      }
+      return result;
+    }
 
-normalBtn.onclick = () => {
-  mode = 'normal';
-  normalBtn.classList.add('selected');
-  hardBtn.classList.remove('selected');
-};
+    // Main obfuscation function
+    function obfuscateLua() {
+      const input = document.getElementById('inputLua').value;
+      if (!input) { alert('Enter Lua code'); return; }
 
-hardBtn.onclick = () => {
-  mode = 'hard';
-  hardBtn.classList.add('selected');
-  normalBtn.classList.remove('selected');
-};
+      // 1. Generate random XOR key
+      const keyChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let key = '';
+      const keyLen = Math.floor(Math.random()*5) + 5;
+      for (let i = 0; i < keyLen; i++) {
+        key += keyChars.charAt(Math.floor(Math.random() * keyChars.length));
+      }
 
-fileInput.onchange = e => {
-  const f = e.target.files[0];
-  if (f) {
-    const r = new FileReader();
-    r.onload = e => codeInput.value = e.target.result;
-    r.readAsText(f);
-  }
-};
+      // 2. XOR-encrypt the input
+      let xorChars = [];
+      for (let i = 0; i < input.length; i++) {
+        xorChars.push(String.fromCharCode(input.charCodeAt(i) ^ key.charCodeAt(i % key.length)));
+      }
 
-obfuscateBtn.onclick = () => {
-  const m = mode || 'normal';
-  if (!mode) normalBtn.classList.add('selected');
-  const code = codeInput.value;
-  if (!code.trim()) return alert('Enter Lua code');
+      // 3. Base64 encode the XOR result
+      let b64 = btoa(xorChars.join(''));
 
-  const raw = [];
-  for (let i = 0; i < code.length; i++) raw.push(code.charCodeAt(i));
+      // 4. Compute checksums for anti-tamper
+      let sumB64 = 0, sumOrig = 0;
+      for (let i = 0; i < b64.length; i++) {
+        sumB64 = (sumB64 + b64.charCodeAt(i)) % 65536;
+      }
+      for (let i = 0; i < input.length; i++) {
+        sumOrig = (sumOrig + input.charCodeAt(i)) % 65536;
+      }
 
-  const names = [];
-  const arrName = getRandomName(names);
-  const strName = getRandomName(names);
-  const fnName = getRandomName(names);
-  const idxName = getRandomName(names);
-  const offsetName = getRandomName(names);
-  const chunkName = m === 'hard' ? getRandomName(names) : null;
+      // 5. Generate random names for Lua variables/functions
+      const varB64 = randName();
+      const varKey = randName();
+      const varAlpha = randName();
+      const funcDec = randName();
+      const funcXor = randName();
+      const bufVar = randName();
+      const loadVar = randName();
 
-  const offset = Math.floor(Math.random() * 100) + 1;
+      // 6. Build the Lua decoding stub (as one long string)
+      //    - Includes the comment credit, Base64 payload, key, alphabet, decode functions, and anti-tamper checks.
+      let stub = '--[[ PROTECTED BY REO ]]--'
+        + 'local ' + varB64 + '="' + b64 + '";'
+        + 'local ' + varKey + '="' + key + '";'
+        + 'local ' + varAlpha + '="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";'
+        + 'local function ' + funcDec + '(t)local r={};local i=1;'
+        + 'while i<=#t do '
+        +   'local a=' + varAlpha + ':find(t:sub(i,i),1,true)-1;'
+        +   'local b=' + varAlpha + ':find(t:sub(i+1,i+1),1,true)-1;'
+        +   'local c=' + varAlpha + ':find(t:sub(i+2,i+2),1,true)-1;'
+        +   'local d=' + varAlpha + ':find(t:sub(i+3,i+3),1,true)-1;'
+        +   'local n=a*2^18 + b*2^12 + c*2^6 + d;'
+        +   'local x=math.floor(n/2^16)%256;'
+        +   'local y=math.floor(n/2^8)%256;'
+        +   'local z=n%256;'
+        +   'r[#r+1]=string.char(x);'
+        +   'if t:sub(i+2,i+2)~="=" then r[#r+1]=string.char(y) end;'
+        +   'if t:sub(i+3,i+3)~="=" then r[#r+1]=string.char(z) end;'
+        +   'i=i+4;'
+        + 'end;return table.concat(r)end;'
+        + 'local function ' + funcXor + '(a,b)local res=0;for k=0,7 do '
+        +   'local aa=a%2; local bb=b%2;'
+        +   'if aa~=bb then res=res+2^k end;'
+        +   'a=math.floor(a/2); b=math.floor(b/2);'
+        + 'end;return res end;'
+        + 'local sum=0; for i=1,#' + varB64 + ' do sum=(sum+' + varB64 + ':byte(i))%65536 end;'
+        + 'if(sum~=' + sumB64 + ')then return end;'
+        + 'local tmp=' + funcDec + '(' + varB64 + ');'
+        + 'local ' + bufVar + '={};'
+        + 'for i=1,#tmp do '
+        +   bufVar + '[#' + bufVar + '+1]=string.char(' + funcXor + '(tmp:byte(i),' + varKey + ':byte((i-1)%#' + varKey + '+1)));'
+        + 'end;'
+        + 'local script=table.concat(' + bufVar + ');'
+        + 'local sum2=0; for i=1,#script do sum2=(sum2+script:byte(i))%65536 end;'
+        + 'if(sum2~=' + sumOrig + ')then return end;'
+        + 'local ' + loadVar + '=(loadstring or load);'
+        + loadVar + '(script)();';
 
-  const parts = ['--[[OBFUSCATED BY REO]]--', '', 'do', `  local ${offsetName} = ${offset}`, `  local ${arrName} = {${raw.map(v => v - offset).join(',')}}`];
+      // 7. (Optional) Insert junk code before stub (not shown here for brevity).
+      //    This could be done by prepending random 'local ...', 'if ... then ... end;' blocks to 'stub'.
 
-  if (m === 'normal') {
-    parts.push(`  local ${strName} = ""`);
-    parts.push(`  for ${idxName} = 1, #${arrName} do ${strName} = ${strName} .. string.char(${arrName}[${idxName}] + ${offsetName}) end`);
-  } else {
-    parts.push(`  local ${chunkName} = {}`);
-    parts.push(`  for ${idxName} = 1, #${arrName} do ${chunkName}[${idxName}] = string.char(${arrName}[${idxName}] + ${offsetName}) end`);
-    parts.push(`  local ${strName} = table.concat(${chunkName})`);
-  }
+      // 8. Output and download
+      document.getElementById('outputLua').value = stub;
+      const blob = new Blob([stub], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'obfuscated.lua';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
-  parts.push(`  local ${fnName} = load or loadstring`);
-  parts.push(`  ${fnName}(${strName})`);
-  parts.push('end');
-
-  const output = parts.join('\n');
-
-  const blob = new Blob([output], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'obfuscated.lua';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-</script>
+    // Hook up the button
+    document.getElementById('obfuscateBtn').addEventListener('click', obfuscateLua);
+  </script>
 </body>
 </html>
