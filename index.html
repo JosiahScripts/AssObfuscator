@@ -1,4 +1,5 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
 <title>REO Obfuscator</title>
@@ -20,49 +21,91 @@
 function getRandomName(existing) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const chars = letters + '0123456789_';
-  const reserved = [
-    'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function',
-    'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then',
-    'true', 'until', 'while', 'load', 'loadstring', 'string', 'table',
-    'concat', 'char'
-  ];
+  const reserved = ['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','load','loadstring','string','table','concat','char'];
   let name;
   do {
     const len = 5 + Math.floor(Math.random() * 4);
     name = letters.charAt(Math.random() * letters.length | 0);
-    for (let i = 1; i < len; i++) {
-      name += chars.charAt(Math.random() * chars.length | 0);
-    }
+    for (let i = 1; i < len; i++) name += chars.charAt(Math.random() * chars.length | 0);
   } while (existing.includes(name) || reserved.includes(name.toLowerCase()));
   existing.push(name);
   return name;
-}const normalBtn = document.getElementById('normalBtn'); const hardBtn = document.getElementById('hardBtn'); const fileInput = document.getElementById('fileInput'); const codeInput = document.getElementById('codeInput'); const obfuscateBtn = document.getElementById('obfuscateBtn'); let mode = null;
+}
 
-normalBtn.onclick = () => { mode = 'normal'; normalBtn.classList.add('selected'); hardBtn.classList.remove('selected'); };
+const normalBtn = document.getElementById('normalBtn'),
+      hardBtn = document.getElementById('hardBtn'),
+      fileInput = document.getElementById('fileInput'),
+      codeInput = document.getElementById('codeInput'),
+      obfuscateBtn = document.getElementById('obfuscateBtn');
+let mode = null;
 
-hardBtn.onclick = () => { mode = 'hard'; hardBtn.classList.add('selected'); normalBtn.classList.remove('selected'); };
+normalBtn.onclick = () => {
+  mode = 'normal';
+  normalBtn.classList.add('selected');
+  hardBtn.classList.remove('selected');
+};
 
-fileInput.onchange = e => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = e => codeInput.value = e.target.result; reader.readAsText(file); } };
+hardBtn.onclick = () => {
+  mode = 'hard';
+  hardBtn.classList.add('selected');
+  normalBtn.classList.remove('selected');
+};
 
-obfuscateBtn.onclick = () => { const m = mode || 'normal'; if (!mode) normalBtn.classList.add('selected');
+fileInput.onchange = e => {
+  const f = e.target.files[0];
+  if (f) {
+    const r = new FileReader();
+    r.onload = e => codeInput.value = e.target.result;
+    r.readAsText(f);
+  }
+};
 
-const code = codeInput.value; if (!code.trim()) { alert('Enter Lua code first'); return; }
+obfuscateBtn.onclick = () => {
+  const m = mode || 'normal';
+  if (!mode) normalBtn.classList.add('selected');
+  const code = codeInput.value;
+  if (!code.trim()) return alert('Enter Lua code');
 
-const bytes = []; for (let i = 0; i < code.length; i++) { bytes.push(code.charCodeAt(i)); }
+  const raw = [];
+  for (let i = 0; i < code.length; i++) raw.push(code.charCodeAt(i));
 
-const names = []; const vA = getRandomName(names); const vB = getRandomName(names); const vC = getRandomName(names); const vD = getRandomName(names); const vE = m === 'hard' ? getRandomName(names) : null;
+  const names = [];
+  const arrName = getRandomName(names);
+  const strName = getRandomName(names);
+  const fnName = getRandomName(names);
+  const idxName = getRandomName(names);
+  const offsetName = getRandomName(names);
+  const chunkName = m === 'hard' ? getRandomName(names) : null;
 
-const parts = ['--[[OBFUSCATED BY REO]]--', 'do'];
+  const offset = Math.floor(Math.random() * 100) + 1;
 
-if (bytes.length <= 50) { parts.push(local ${vA} = {${bytes.join(',')}}); } else { parts.push(local ${vA} = {); for (let i = 0; i < bytes.length; i += 50) { const chunk = bytes.slice(i, i + 50).join(','); parts.push(${chunk}${i + 50 < bytes.length ? ',' : ''}); } parts.push('}'); }
+  const parts = ['--[[OBFUSCATED BY REO]]--', '', 'do', `  local ${offsetName} = ${offset}`, `  local ${arrName} = {${raw.map(v => v - offset).join(',')}}`];
 
-if (m === 'normal') { parts.push(local ${vB} = ""); parts.push(for ${vD} = 1, #${vA} do ${vB} = ${vB} .. string.char(${vA}[${vD}]) end); } else { parts.push(local ${vE} = {}); parts.push(for ${vD} = 1, #${vA} do ${vE}[${vD}] = string.char(${vA}[${vD}]) end); parts.push(local ${vB} = table.concat(${vE})); }
+  if (m === 'normal') {
+    parts.push(`  local ${strName} = ""`);
+    parts.push(`  for ${idxName} = 1, #${arrName} do ${strName} = ${strName} .. string.char(${arrName}[${idxName}] + ${offsetName}) end`);
+  } else {
+    parts.push(`  local ${chunkName} = {}`);
+    parts.push(`  for ${idxName} = 1, #${arrName} do ${chunkName}[${idxName}] = string.char(${arrName}[${idxName}] + ${offsetName}) end`);
+    parts.push(`  local ${strName} = table.concat(${chunkName})`);
+  }
 
-parts.push(local ${vC} = load or loadstring); parts.push(${vC}(${vB})); parts.push('end');
+  parts.push(`  local ${fnName} = load or loadstring`);
+  parts.push(`  ${fnName}(${strName})`);
+  parts.push('end');
 
-const output = parts.join('; ');
+  const output = parts.join('\n');
 
-const blob = new Blob([output], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'obfuscated.lua'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }; </script>
-
+  const blob = new Blob([output], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'obfuscated.lua';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+</script>
 </body>
 </html>
