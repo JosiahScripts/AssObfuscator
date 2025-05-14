@@ -1,21 +1,105 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>REO Lua Obfuscator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryzix Obfuscator</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    textarea { width: 100%; height: 200px; margin-bottom: 10px; font-family: monospace; }
-    button { padding: 10px 20px; font-size: 16px; }
+  
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://i.pinimg.com/originals/ce/cb/10/cecb103c7c033aed53608bf43921ee06.gif') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      overflow: hidden;
+    }/* Fade‐in container */
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 16px;
+  animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 8px #f0c;
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  margin-bottom: 16px;
+  font-family: monospace;
+  font-size: 1rem;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  resize: vertical;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+button {
+  flex: 1 1 200px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 4px #0ff;
+  box-shadow: 0 0 10px #0ff, inset 0 0 6px #0ff;
+  background: rgba(0, 255, 255, 0.1);
+  transition: transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:hover {
+  box-shadow: 0 0 20px #0ff, inset 0 0 8px #0ff;
+}
+
+/* Spacer between buttons and output */
+.spacer { height: 12px; }
+
   </style>
 </head>
 <body>
-  <h1>REO Lua Obfuscator</h1>
-  <textarea id="inputLua" placeholder="Paste your Lua code here…"></textarea><br>
-  <button id="obfuscateBtn">Obfuscate &amp; Download</button>
-  <textarea id="outputLua" readonly placeholder="Obfuscated Lua will appear here…"></textarea>
+  <div class="container">
+    <h1>Cryzix Obfuscator</h1><textarea id="inputLua" placeholder="Paste your Lua code here…"></textarea>
 
-  <script>
+<div class="buttons">
+  <button id="obfuscateBtn">Obfuscate Code</button>
+  <button id="downloadBtn">Download Obfuscated Code</button>
+  <button id="copyBtn">Copy Obfuscated Code</button>
+</div>
+
+<div class="spacer"></div>
+
+<textarea id="outputLua" readonly placeholder="Obfuscated Lua will appear here…"></textarea>
+
+  </div>  <script>
     // Random identifier generator
     function randName(len) {
       len = len || Math.floor(Math.random() * 5) + 5;
@@ -51,12 +135,8 @@
 
       // 4) Compute checksums for anti‐tamper
       let sumB64 = 0, sumOrig = 0;
-      for (let i = 0; i < b64.length; i++) {
-        sumB64 = (sumB64 + b64.charCodeAt(i)) % 65536;
-      }
-      for (let i = 0; i < input.length; i++) {
-        sumOrig = (sumOrig + input.charCodeAt(i)) % 65536;
-      }
+      for (let i = 0; i < b64.length; i++) sumB64 = (sumB64 + b64.charCodeAt(i)) % 65536;
+      for (let i = 0; i < input.length; i++) sumOrig = (sumOrig + input.charCodeAt(i)) % 65536;
 
       // 5) Generate random names for Lua variables/functions
       const varB64   = randName();
@@ -67,8 +147,8 @@
       const bufVar   = randName();
       const loadVar  = randName();
 
-      // 6) Build the Lua stub (with proper '=' handling and credit newline)
-      let stub = '--[[ PROTECTED BY REO ]]--\n'
+      // 6) Build the Lua stub (with proper credit)
+      let stub = '--[[ PROTECTED BY CRYZIX ]]--\n'
         + 'local ' + varB64   + '="' + b64   + '";'
         + 'local ' + varKey   + '="' + key   + '";'
         + 'local ' + varAlpha + '="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";'
@@ -109,20 +189,31 @@
         + 'local ' + loadVar + '=(loadstring or load);'
         + loadVar + '(script)();';
 
-      // (Optional) Insert ~40KB of junk code here before `stub`
+      // 7) Return stub
+      return stub;
+    }
 
-      // 7) Output & trigger download
-      document.getElementById('outputLua').value = stub;
-      const blob = new Blob([stub], { type: 'text/plain' });
+    // Handlers
+    document.getElementById('obfuscateBtn').addEventListener('click', () => {
+      document.getElementById('outputLua').value = obfuscateLua();
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const content = document.getElementById('outputLua').value;
+      if (!content) return;
+      const blob = new Blob([content], { type: 'text/plain' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       a.href     = url;
       a.download = 'obfuscated.lua';
       a.click();
       URL.revokeObjectURL(url);
-    }
+    });
 
-    document.getElementById('obfuscateBtn').addEventListener('click', obfuscateLua);
-  </script>
-</body>
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const text = document.getElementById('outputLua').value;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+    });
+  </script></body>
 </html>
