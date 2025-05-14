@@ -4,216 +4,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cryzix Obfuscator</title>
   <style>
-  
     body {
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('https://i.pinimg.com/originals/ce/cb/10/cecb103c7c033aed53608bf43921ee06.gif') no-repeat center center fixed;
+      background: url('https://media1.tenor.com/m/Z5wTNShAZnsAAAAd/cat-dance.gif') no-repeat center center fixed;
       background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       color: #fff;
-      overflow: hidden;
-    }/* Fade‐in container */
-.container {
-  max-width: 800px;
-  margin: 50px auto;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 16px;
-  animation: fadeIn 1s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-h1 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  text-shadow: 0 0 8px #f0c;
-}
-
-textarea {
-  width: 100%;
-  height: 200px;
-  margin-bottom: 16px;
-  font-family: monospace;
-  font-size: 1rem;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  outline: none;
-  resize: vertical;
-}
-
-.buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-button {
-  flex: 1 1 200px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  text-shadow: 0 0 4px #0ff;
-  box-shadow: 0 0 10px #0ff, inset 0 0 6px #0ff;
-  background: rgba(0, 255, 255, 0.1);
-  transition: transform 0.1s ease;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-button:hover {
-  box-shadow: 0 0 20px #0ff, inset 0 0 8px #0ff;
-}
-
-/* Spacer between buttons and output */
-.spacer { height: 12px; }
-
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 16px;
+      animation: fadeIn 1s ease;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-shadow: 0 0 8px #0ff;
+    }
+    textarea {
+      width: 100%;
+      height: 180px;
+      margin: 12px 0;
+      font-family: monospace;
+      font-size: 1rem;
+      padding: 12px;
+      border: 2px solid rgba(0,255,255,0.6);
+      border-radius: 8px;
+      background: rgba(0,255,255,0.1);
+      color: #fff;
+      resize: vertical;
+    }
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    button {
+      flex: 1 1 200px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-shadow: 0 0 4px #0ff;
+      box-shadow: 0 0 10px #0ff, inset 0 0 6px #0ff;
+      background: rgba(0, 255, 255, 0.2);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    button:hover {
+      box-shadow: 0 0 20px #0ff, inset 0 0 8px #0ff;
+    }
+    .info-section {
+      margin-top: 20px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .info-section h2 {
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+      text-shadow: 0 0 6px #0ff;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Cryzix Obfuscator</h1><textarea id="inputLua" placeholder="Paste your Lua code here…"></textarea>
-
-<div class="buttons">
-  <button id="obfuscateBtn">Obfuscate Code</button>
-  <button id="downloadBtn">Download Obfuscated Code</button>
-  <button id="copyBtn">Copy Obfuscated Code</button>
-</div>
-
-<div class="spacer"></div>
-
-<textarea id="outputLua" readonly placeholder="Obfuscated Lua will appear here…"></textarea>
-
+    <h1>Cryzix Obfuscator</h1>
+    <textarea id="inputLua" placeholder="Paste your Lua code here…"></textarea>
+    <div class="buttons">
+      <button id="obfuscateBtn">Obfuscate Code</button>
+    </div>
+    <textarea id="outputLua" readonly placeholder="Obfuscated Lua will appear here…"></textarea>
+    <div class="buttons">
+      <button id="downloadBtn">Download Obfuscated Code</button>
+      <button id="copyBtn">Copy Obfuscated Code</button>
+    </div>
+    <div class="info-section">
+      <h2>What is this site for?</h2>
+      <p>This tool obfuscates your Lua scripts, encrypting and encoding them to protect your code from reverse-engineering and theft.</p>
+      <p>Simply paste your script, hit <strong>Obfuscate Code</strong>, then copy or download the secured version. Safe, fast, and free!</p>
+    </div>
   </div>  <script>
-    // Random identifier generator
     function randName(len) {
       len = len || Math.floor(Math.random() * 5) + 5;
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
       const chars   = letters + '0123456789_';
       let name = letters.charAt(Math.floor(Math.random() * letters.length));
-      for (let i = 1; i < len; i++) {
-        name += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
+      for (let i = 1; i < len; i++) name += chars.charAt(Math.floor(Math.random() * chars.length));
       return name;
     }
 
     function obfuscateLua() {
       const input = document.getElementById('inputLua').value;
-      if (!input) { alert('Please paste some Lua code first.'); return; }
-
-      // 1) Generate XOR key
-      const keyChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let key = '';
-      const keyLen = Math.floor(Math.random() * 5) + 5;
-      for (let i = 0; i < keyLen; i++) {
-        key += keyChars.charAt(Math.floor(Math.random() * keyChars.length));
-      }
-
-      // 2) XOR‐encrypt the Lua source
+      if (!input) return;
+      let key = '', keyChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < Math.floor(Math.random() * 5) + 5; i++) key += keyChars.charAt(Math.floor(Math.random() * keyChars.length));
       let xorArr = [];
-      for (let i = 0; i < input.length; i++) {
-        xorArr.push(String.fromCharCode(input.charCodeAt(i) ^ key.charCodeAt(i % key.length)));
-      }
-
-      // 3) Base64‐encode the XOR result
+      for (let i = 0; i < input.length; i++) xorArr.push(String.fromCharCode(input.charCodeAt(i) ^ key.charCodeAt(i % key.length)));
       const b64 = btoa(xorArr.join(''));
-
-      // 4) Compute checksums for anti‐tamper
       let sumB64 = 0, sumOrig = 0;
       for (let i = 0; i < b64.length; i++) sumB64 = (sumB64 + b64.charCodeAt(i)) % 65536;
       for (let i = 0; i < input.length; i++) sumOrig = (sumOrig + input.charCodeAt(i)) % 65536;
-
-      // 5) Generate random names for Lua variables/functions
-      const varB64   = randName();
-      const varKey   = randName();
-      const varAlpha = randName();
-      const funcDec  = randName();
-      const funcXor  = randName();
-      const bufVar   = randName();
-      const loadVar  = randName();
-
-      // 6) Build the Lua stub (with proper credit)
-      let stub = '--[[ PROTECTED BY CRYZIX ]]--\n'
-        + 'local ' + varB64   + '="' + b64   + '";'
-        + 'local ' + varKey   + '="' + key   + '";'
-        + 'local ' + varAlpha + '="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";'
-        + 'local function ' + funcDec + '(t)local r={}local i=1;'
-        + 'while i<=#t do '
-        +   'local c1=t:sub(i,i) local c2=t:sub(i+1,i+1);'
-        +   'local c3=t:sub(i+2,i+2) local c4=t:sub(i+3,i+3);'
-        +   'local a=' + varAlpha + ':find(c1,1,true)-1;'
-        +   'local b=' + varAlpha + ':find(c2,1,true)-1;'
-        +   'local c=(c3=="=") and 0 or ' + varAlpha + ':find(c3,1,true)-1;'
-        +   'local d=(c4=="=") and 0 or ' + varAlpha + ':find(c4,1,true)-1;'
-        +   'local n=a*2^18 + b*2^12 + c*2^6 + d;'
-        +   'local x=math.floor(n/2^16)%256;'
-        +   'local y=math.floor(n/2^8)%256;'
-        +   'local z=n%256;'
-        +   'r[#r+1]=string.char(x);'
-        +   'if c3~="=" then r[#r+1]=string.char(y) end;'
-        +   'if c4~="=" then r[#r+1]=string.char(z) end;'
-        +   'i=i+4;'
-        + 'end;'
-        + 'return table.concat(r)end;'
-        + 'local function ' + funcXor + '(a,b)local r=0;for k=0,7 do '
-        +   'local A=a%2 local B=b%2;'
-        +   'if A~=B then r=r+2^k end;'
-        +   'a=math.floor(a/2) b=math.floor(b/2);'
-        + 'end;return r end;'
-        + 'local sum=0; for i=1,#' + varB64 + ' do sum=(sum+' + varB64 + ':byte(i))%65536 end;'
-        + 'if sum~=' + sumB64 + ' then return end;'
-        + 'local tmp=' + funcDec + '(' + varB64 + ');'
-        + 'local ' + bufVar + '={};'
-        + 'for i=1,#tmp do '
-        +   bufVar + '[#' + bufVar + '+1]=string.char(' + funcXor
-        +   '(tmp:byte(i),' + varKey + ':byte((i-1)%#' + varKey + '+1)));'
-        + 'end;'
-        + 'local script=table.concat(' + bufVar + ');'
-        + 'local sum2=0; for i=1,#script do sum2=(sum2+script:byte(i))%65536 end;'
-        + 'if sum2~=' + sumOrig + ' then return end;'
-        + 'local ' + loadVar + '=(loadstring or load);'
-        + loadVar + '(script)();';
-
-      // 7) Return stub
-      return stub;
+      const vars = { b64: randName(), key: randName(), alpha: randName(), dec: randName(), xor: randName(), buf: randName(), load: randName() };
+      let stub = '--[[ PROTECTED BY CRYZIX ]]--\n';
+      stub += `local ${vars.b64}="${b64}";local ${vars.key}="${key}";local ${vars.alpha}="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";`;
+      stub += `local function ${vars.dec}(t)local r={},i=1;while i<=#t do local c1=t:sub(i,i),c2=t:sub(i+1,i+1),c3=t:sub(i+2,i+2),c4=t:sub(i+3,i+3);`;
+      stub += `local a=${vars.alpha}:find(c1)-1,b=${vars.alpha}:find(c2)-1,c=(c3=="=")and 0 or ${vars.alpha}:find(c3)-1,d=(c4=="=")and 0 or ${vars.alpha}:find(c4)-1;`;
+      stub += `local n=a*2^18+b*2^12+c*2^6+d;table.insert(r,string.char(math.floor(n/2^16)%256));if c3~="=" then table.insert(r,string.char(math.floor(n/2^8)%256)) end;if c4~="=" then table.insert(r,string.char(n%256)) end;i=i+4 end;return table.concat(r)end;`;
+      stub += `local function ${vars.xor}(a,b)local r=0;for k=0,7 do local A=a%2,B=b%2;if A~=B then r=r+2^k end;a=math.floor(a/2);b=math.floor(b/2);end;return r end;`;
+      stub += `local sum=0;for i=1,#${vars.b64}do sum=(sum+${vars.b64}:byte(i))%65536 end;if sum~= ${sumB64}then return end;`;
+      stub += `local tmp=${vars.dec}(${vars.b64});local ${vars.buf}={};for i=1,#tmp do table.insert(${vars.buf},string.char(${vars.xor}(tmp:byte(i),${vars.key}:byte((i-1)%#${vars.key}+1)))) end;`;
+      stub += `local script=table.concat(${vars.buf});local sum2=0;for i=1,#script do sum2=(sum2+script:byte(i))%65536 end;if sum2~= ${sumOrig}then return end;`;
+      stub += `local ${vars.load}=(loadstring or load);${vars.load}(script)();`;
+      document.getElementById('outputLua').value = stub;
     }
 
-    // Handlers
-    document.getElementById('obfuscateBtn').addEventListener('click', () => {
-      document.getElementById('outputLua').value = obfuscateLua();
-    });
-
+    document.getElementById('obfuscateBtn').addEventListener('click', obfuscateLua);
     document.getElementById('downloadBtn').addEventListener('click', () => {
-      const content = document.getElementById('outputLua').value;
-      if (!content) return;
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href     = url;
-      a.download = 'obfuscated.lua';
-      a.click();
-      URL.revokeObjectURL(url);
+      const text = document.getElementById('outputLua').value; if (!text) return;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'obfuscated.lua'; a.click(); URL.revokeObjectURL(url);
     });
-
     document.getElementById('copyBtn').addEventListener('click', () => {
-      const text = document.getElementById('outputLua').value;
-      if (!text) return;
-      navigator.clipboard.writeText(text);
+      const text = document.getElementById('outputLua').value; if (!text) return; navigator.clipboard.writeText(text);
     });
   </script></body>
 </html>
