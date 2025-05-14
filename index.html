@@ -1,9 +1,11 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cryzix Obfuscator</title>
+  <title>Cryzix Obfuscator V1</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
       padding: 0;
@@ -15,6 +17,7 @@
       justify-content: center;
       min-height: 100vh;
       color: #fff;
+      text-align: center;
     }
     .container {
       width: 90%;
@@ -24,7 +27,7 @@
       background: rgba(0, 0, 0, 0.7);
       border-radius: 16px;
       animation: fadeIn 1s ease;
-      text-align: center;
+      margin: auto;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
@@ -32,12 +35,12 @@
     }
     h1 {
       margin-bottom: 20px;
-      font-size: 2.5rem;
+      font-size: 2rem;
       text-shadow: 0 0 8px #0ff;
     }
     textarea {
       width: 100%;
-      height: 180px;
+      height: 160px;
       margin: 12px 0;
       font-family: monospace;
       font-size: 1rem;
@@ -56,7 +59,7 @@
       margin-bottom: 20px;
     }
     button {
-      flex: 1 1 200px;
+      flex: 1 1 150px;
       padding: 12px 20px;
       font-size: 1rem;
       border: none;
@@ -67,12 +70,8 @@
       background: rgba(0, 255, 255, 0.2);
       transition: transform 0.1s ease, box-shadow 0.2s ease;
     }
-    button:active {
-      transform: scale(0.95);
-    }
-    button:hover {
-      box-shadow: 0 0 20px #0ff, inset 0 0 8px #0ff;
-    }
+    button:active { transform: scale(0.95); }
+    button:hover { box-shadow: 0 0 20px #0ff, inset 0 0 8px #0ff; }
     .info-section {
       margin-top: 20px;
       font-size: 1rem;
@@ -82,6 +81,21 @@
       margin-bottom: 10px;
       font-size: 1.5rem;
       text-shadow: 0 0 6px #0ff;
+    }
+    .extra {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .extra a {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: rgba(0,255,255,0.2);
+      text-decoration: none;
+      color: #fff;
+      text-shadow: 0 0 4px #0ff;
     }
   </style>
 </head>
@@ -99,10 +113,15 @@
     </div>
     <div class="info-section">
       <h2>What is this site for?</h2>
-      <p>This tool obfuscates your Lua scripts, encrypting and encoding them to protect your code from reverse-engineering and theft.</p>
-      <p>Simply paste your script, hit <strong>Obfuscate Code</strong>, then copy or download the secured version. Safe, fast, and free!</p>
+      <p>This website obfuscates your lua script and protects it from thefts A.K.A skidders.</p>
+      <p>Simply paste your script, hit <strong>Obfuscate Code</strong>, then copy or download the obfuscated version of your code. Safe, fast, and free!</p>
     </div>
-  </div>  <script>
+    <div class="extra">
+      <a href="https://dsc.gg/cryzixbb" target="_blank">JOIN DISCORD SERVER</a>
+      <a href="https://lootdest.org/s?hbY8G6UQ&data=vKZ7P4VswueU5RD8FrkwWgPB97DE/9cpTDAwEQB5nOo%3D" target="_blank">SUPPORT THIS WEBSITE</a>
+    </div>
+  </div>
+  <script>
     function randName(len) {
       len = len || Math.floor(Math.random() * 5) + 5;
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -125,27 +144,35 @@
       for (let i = 0; i < input.length; i++) sumOrig = (sumOrig + input.charCodeAt(i)) % 65536;
       const vars = { b64: randName(), key: randName(), alpha: randName(), dec: randName(), xor: randName(), buf: randName(), load: randName() };
       let stub = '--[[ PROTECTED BY CRYZIX ]]--\n';
-      stub += `local ${vars.b64}="${b64}";local ${vars.key}="${key}";local ${vars.alpha}="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";`;
+      stub += `local ${vars.b64}=\"${b64}\";local ${vars.key}=\"${key}\";local ${vars.alpha}=\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\";`;
       stub += `local function ${vars.dec}(t)local r={},i=1;while i<=#t do local c1=t:sub(i,i),c2=t:sub(i+1,i+1),c3=t:sub(i+2,i+2),c4=t:sub(i+3,i+3);`;
-      stub += `local a=${vars.alpha}:find(c1)-1,b=${vars.alpha}:find(c2)-1,c=(c3=="=")and 0 or ${vars.alpha}:find(c3)-1,d=(c4=="=")and 0 or ${vars.alpha}:find(c4)-1;`;
-      stub += `local n=a*2^18+b*2^12+c*2^6+d;table.insert(r,string.char(math.floor(n/2^16)%256));if c3~="=" then table.insert(r,string.char(math.floor(n/2^8)%256)) end;if c4~="=" then table.insert(r,string.char(n%256)) end;i=i+4 end;return table.concat(r)end;`;
-      stub += `local function ${vars.xor}(a,b)local r=0;for k=0,7 do local A=a%2,B=b%2;if A~=B then r=r+2^k end;a=math.floor(a/2);b=math.floor(b/2);end;return r end;`;
-      stub += `local sum=0;for i=1,#${vars.b64}do sum=(sum+${vars.b64}:byte(i))%65536 end;if sum~= ${sumB64}then return end;`;
+      stub += `local a=${vars.alpha}:find(c1)-1,b=${vars.alpha}:find(c2)-1,c=(c3==\"=\")and 0 or ${vars.alpha}:find(c3)-1,d=(c4==\"=\")and 0 or ${vars.alpha}:find(c4)-1;`;
+      stub += `local n=a*2^18+b*2^12+c*2^6+d;table.insert(r,string.char(math.floor(n/2^16)%256));if c3~=\"=\" then table.insert(r,string.char(math.floor(n/2^8)%256)) end;if c4~=\"=\" then table.insert(r,string.char(n%256)) end;i=i+4 end;return table.concat(r)end;`;
+      stub += `local function ${vars.xor}(a,b)local r=0;for k=0,7 do local A=a%2,B=b%2;if A!==B then r=r+2^k end;a=math.floor(a/2);b=math.floor(b/2);end;return r end;`;
+      stub += `local sum=0;for i=1,#${vars.b64}do sum=(sum+${vars.b64}:byte(i))%65536 end;if sum~=${sumB64}then return end;`;
       stub += `local tmp=${vars.dec}(${vars.b64});local ${vars.buf}={};for i=1,#tmp do table.insert(${vars.buf},string.char(${vars.xor}(tmp:byte(i),${vars.key}:byte((i-1)%#${vars.key}+1)))) end;`;
-      stub += `local script=table.concat(${vars.buf});local sum2=0;for i=1,#script do sum2=(sum2+script:byte(i))%65536 end;if sum2~= ${sumOrig}then return end;`;
+      stub += `local script=table.concat(${vars.buf});local sum2=0;for i=1,#script do sum2=(sum2+script:byte(i))%65536 end;if sum2~=${sumOrig}then return end;`;
       stub += `local ${vars.load}=(loadstring or load);${vars.load}(script)();`;
       document.getElementById('outputLua').value = stub;
     }
 
     document.getElementById('obfuscateBtn').addEventListener('click', obfuscateLua);
     document.getElementById('downloadBtn').addEventListener('click', () => {
-      const text = document.getElementById('outputLua').value; if (!text) return;
+      const text = document.getElementById('outputLua').value;
+      if (!text) return;
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'obfuscated.lua'; a.click(); URL.revokeObjectURL(url);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'obfuscated.lua';
+      a.click();
+      URL.revokeObjectURL(url);
     });
     document.getElementById('copyBtn').addEventListener('click', () => {
-      const text = document.getElementById('outputLua').value; if (!text) return; navigator.clipboard.writeText(text);
+      const output = document.getElementById('outputLua');
+      output.select();
+      document.execCommand('copy');
     });
-  </script></body>
+  </script>
+</body>
 </html>
