@@ -1,155 +1,170 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reo Obfuscator V0.09</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-      height: 100vh;
-      margin: 0;
-      background: #220000;
-      color: #fff;
-    }.navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: #330000;
-  padding: 1rem;
-  text-align: center;
-  border-bottom: 2px solid #009dff;
-  font-size: 1.5rem;
-  color: #009dff;
-  font-weight: bold;
-  z-index: 1000;
-}
-
-.card {
-  margin-top: 6rem;
-  background: rgba(255, 0, 0, 0.2);
-  border: 2px solid #009dff;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 12px #009dff;
-  width: 360px;
-}
-
-h3, h5, input, button {
-  color: #fff;
-}
-
-input[type="file"],
-input[type="text"] {
-  display: block;
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  border-radius: 5px;
-  background: #440000;
-  border: 1px solid #009dff;
-}
-
-button {
-  width: 100%;
-  padding: 0.7rem;
-  background: #009dff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background: #ff3333;
-}
-
-.file-info {
-  font-size: 0.9rem;
-  color: #ccc;
-}
-
-  </style>
+<meta charset="UTF-8">
+<title>REO Obfuscator</title>
+<style>
+  .mode-btn {
+    background-color: red;
+    color: white;
+    padding: 8px 16px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+  }
+  .mode-btn.selected {
+    background-color: green;
+  }
+  #obfuscateBtn {
+    background-color: #007BFF;
+    color: white;
+    padding: 8px 16px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+  }
+  #codeInput {
+    width: 90%;
+    height: 200px;
+    margin-top: 10px;
+    font-family: monospace;
+  }
+</style>
 </head>
 <body>
-  <div class="navbar">Reo Obfuscator V0.09</div>  <form id="form" class="card">
-    <h3>Upload .lua or .txt</h3>
-    <input type="file" id="fileInput" accept=".lua,.txt" />
-    <div id="fileInfo" class="file-info">No file chosen</div><h3>Key</h3>
-<input type="text" id="keyInput" placeholder="Encryption key" required />
-<h5>Enter any key</h5>
+<h1>REO Obfuscator</h1>
+<button id="normalBtn" class="mode-btn">Normal Mode</button>
+<button id="hardBtn" class="mode-btn">Hard Mode</button>
+<br>
+<input type="file" id="fileInput" accept=".lua">
+<br>
+<textarea id="codeInput" placeholder="Paste your Lua code here"></textarea>
+<br>
+<button id="obfuscateBtn">Obfuscate</button>
 
-<button type="submit">Obfuscate</button>
-
-  </form>  <script>
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const form = document.getElementById('form');
-    const reader = new FileReader();
-    let currentFile, currentKey;
-
-    fileInput.addEventListener('change', () => {
-      currentFile = fileInput.files[0];
-      if (currentFile) {
-        const sizeKB = (currentFile.size / 1024).toFixed(2);
-        fileInfo.textContent = `${currentFile.name} (${sizeKB} KB)`;
-      } else {
-        fileInfo.textContent = 'No file chosen';
+<script>
+  // Utility to generate random variable names
+  function getRandomName(existing) {
+    const firstChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
+    const reserved = ['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','load','loadstring','string','table','concat','char'];
+    let name;
+    do {
+      let len = Math.floor(Math.random() * 4) + 5; // length between 5 and 8
+      name = firstChars.charAt(Math.floor(Math.random() * firstChars.length));
+      for (let i = 1; i < len; i++) {
+        name += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-    });
+    } while (existing.includes(name) || reserved.includes(name.toLowerCase()));
+    existing.push(name);
+    return name;
+  }
 
-    function rollXor(str, seed) {
-      const out = [];
-      let k = seed & 0xFF;
-      for (let i = 0; i < str.length; i++) {
-        const b = str.charCodeAt(i) ^ k;
-        out.push(b);
-        k = (k + b) & 0xFF;
-      }
-      return out;
+  // Handle mode button selection
+  let normalBtn = document.getElementById('normalBtn');
+  let hardBtn = document.getElementById('hardBtn');
+  let selectedMode = null;
+
+  normalBtn.addEventListener('click', function() {
+    normalBtn.classList.add('selected');
+    hardBtn.classList.remove('selected');
+    selectedMode = 'normal';
+  });
+
+  hardBtn.addEventListener('click', function() {
+    hardBtn.classList.add('selected');
+    normalBtn.classList.remove('selected');
+    selectedMode = 'hard';
+  });
+
+  // Handle file upload
+  document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('codeInput').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  // Obfuscate and download
+  document.getElementById('obfuscateBtn').addEventListener('click', function() {
+    let mode = selectedMode;
+    if (!mode) {
+      // default to normal if none selected
+      mode = 'normal';
+      normalBtn.classList.add('selected');
+    }
+    let code = document.getElementById('codeInput').value;
+    // Convert code to byte values
+    let bytes = [];
+    for (let i = 0; i < code.length; i++) {
+      bytes.push(code.charCodeAt(i));
     }
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      if (!fileInput.files.length) return alert('Select a .lua or .txt file.');
-      const key = keyInput.value;
-      if (!key) return alert('Enter an encryption key.');
-      currentKey = key;
-      reader.readAsText(currentFile);
-    });
+    // Prepare random names
+    let usedNames = [];
+    let arrName = getRandomName(usedNames);
+    let strName = getRandomName(usedNames);
+    let fnName = getRandomName(usedNames);
+    let idxName = getRandomName(usedNames);
+    let tableName = null;
+    if (mode === 'hard') {
+      tableName = getRandomName(usedNames);
+    }
 
-    reader.onload = () => {
-      const src = reader.result;
-      const seed = src.length ^ currentKey.length;
-      const data = rollXor(src, seed);
-      const tableLit = `local p={14,1,10,5,4,8,3,7,13,2,12,11,9,15,16,6,17}` + "\n" + `local d={${data.join(',')}}`;
-      const stub =
-        `local bit=bit32\n` +
-        `local function confuse() local t={"fake","trap","useless"} return t[math.random(1,#t)] end\n` +
-        `local fakeFunc=function() return confuse()..confuse() end\n\n` +
-        `${tableLit}\n` +
-        `local r={} for i=1,#p do if i%2==0 then r[p[i]]=d[i] else local _fake=function()return "noise" end r[p[i]]=d[i] end end\n\n` +
-        `local _seed=${seed}\n` +
-        `local _s=""\n` +
-        `local steps={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17}\n` +
-        `for i=1,#r do if steps[i]%3==0 then _s=_s..string.char(bit.bxor(r[i],_seed)) elseif steps[i]%2==0 then local __=function()return math.huge end _s=_s..string.char(bit.bxor(r[i],_seed)) else _s=_s..string.char(bit.bxor(r[i],_seed)) end end\n\n` +
-        `local _loader=function(code) local mutated=code:gsub(".",function(c)return string.char(bit.bxor(string.byte(c),_seed))end) return loadstring(mutated) end\n\n` +
-        `local _decoded=_s:gsub(".",function(c)return string.char(bit.bxor(string.byte(c),_seed))end)\n` +
-        `local f=loadstring(_s) f()`;
+    // Build obfuscated code lines
+    let lines = [];
+    lines.push('--[[ OBFUSCATED BY REO OBFUSCATOR ]]--');
+    lines.push('do');
+    // Array of bytes
+    if (bytes.length <= 50) {
+      lines.push('  local ' + arrName + ' = {' + bytes.join(', ') + '}');
+    } else {
+      lines.push('  local ' + arrName + ' = {');
+      for (let i = 0; i < bytes.length; i += 50) {
+        let chunk = bytes.slice(i, i + 50).join(', ');
+        if (i + 50 < bytes.length) {
+          lines.push('    ' + chunk + ',');
+        } else {
+          lines.push('    ' + chunk);
+        }
+      }
+      lines.push('  }');
+    }
 
-      const blob = new Blob([stub], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Obfuscated.lua';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    };
-  </script></body>
+    if (mode === 'normal') {
+      lines.push('  local ' + strName + ' = ""');
+      lines.push('  for ' + idxName + ' = 1, #' + arrName + ' do');
+      lines.push('    ' + strName + ' = ' + strName + ' .. string.char(' + arrName + '[' + idxName + '])');
+      lines.push('  end');
+    } else {
+      // hard mode
+      lines.push('  local ' + tableName + ' = {}');
+      lines.push('  for ' + idxName + ' = 1, #' + arrName + ' do');
+      lines.push('    ' + tableName + '[' + idxName + '] = string.char(' + arrName + '[' + idxName + '])');
+      lines.push('  end');
+      lines.push('  local ' + strName + ' = table.concat(' + tableName + ')');
+    }
+
+    lines.push('  local ' + fnName + ' = load or loadstring');
+    lines.push('  ' + fnName + '(' + strName + ')()');
+    lines.push('end');
+
+    let obfuscatedCode = lines.join('\n');
+    // Create a blob and trigger download
+    let blob = new Blob([obfuscatedCode], { type: 'text/plain' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'obfuscated.lua';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+</script>
+</body>
 </html>
