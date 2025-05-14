@@ -3,10 +3,10 @@
 <meta charset="UTF-8">
 <title>REO Obfuscator</title>
 <style>
-  .mode-btn{background-color:red;color:white;padding:8px 16px;margin:5px;border:none;cursor:pointer}
-  .mode-btn.selected{background-color:green}
-  #obfuscateBtn{background-color:#007BFF;color:white;padding:8px 16px;margin:5px;border:none;cursor:pointer}
-  #codeInput{width:90%;height:200px;margin-top:10px;font-family:monospace}
+  .mode-btn { background-color: red; color: white; padding: 8px 16px; margin: 5px; border: none; cursor: pointer; }
+  .mode-btn.selected { background-color: green; }
+  #obfuscateBtn { background-color: #007BFF; color: white; padding: 8px 16px; margin: 5px; border: none; cursor: pointer; }
+  #codeInput { width: 90%; height: 200px; margin-top: 10px; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -17,23 +17,52 @@
 <textarea id="codeInput" placeholder="Paste your Lua code here"></textarea><br>
 <button id="obfuscateBtn">Obfuscate</button>
 <script>
-function getRandomName(existing){const f='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';const c=f+'0123456789_';const r=['and','break','do','else','elseif','end','false','for','function','if','in','local','nil','not','or','repeat','return','then','true','until','while','load','loadstring','string','table','concat','char'];let n;do{let l=5+Math.floor(Math.random()*4);n=f.charAt(Math.random()*f.length|0);for(let i=1;i<l;i++)n+=c.charAt(Math.random()*c.length|0);}while(existing.includes(n)||r.includes(n.toLowerCase()));existing.push(n);return n}
-const normalBtn=document.getElementById('normalBtn'),hardBtn=document.getElementById('hardBtn'),fileInput=document.getElementById('fileInput'),codeInput=document.getElementById('codeInput'),obfuscateBtn=document.getElementById('obfuscateBtn');let mode=null;
-normalBtn.onclick=()=>{mode='normal';normalBtn.classList.add('selected');hardBtn.classList.remove('selected')};
-hardBtn.onclick=()=>{mode='hard';hardBtn.classList.add('selected');normalBtn.classList.remove('selected')};
-fileInput.onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=e=>codeInput.value=e.target.result;r.readAsText(f)}};
-obfuscateBtn.onclick=()=>{let m=mode||'normal';if(!mode)normalBtn.classList.add('selected');let code=codeInput.value;if(!code.trim()){alert('Enter Lua code');return;}let bytes=[];for(let i=0;i<code.length;i++)bytes.push(code.charCodeAt(i));let names=[];const a=getRandomName(names),b=getRandomName(names),c=getRandomName(names),d=getRandomName(names),eName=m==='hard'?getRandomName(names):null;let parts=['--[[OBFUSCATED BY REO]]--','do'];
-if(bytes.length<=50)parts.push(`local ${a}={${bytes.join(',')}}`);
-else{parts.push(`local ${a}={`);for(let i=0;i<bytes.length;i+=50){let chunk=bytes.slice(i,i+50).join(',');parts.push(chunk+(i+50<bytes.length?',':''));}parts.push('}');}
-if(m==='normal'){parts.push(`local ${b} = ""`);parts.push(`for ${d} = 1, #${a} do ${b} = ${b} .. string.char(${a}[${d}]) end`);} 
-else{parts.push(`local ${eName} = {}`);parts.push(`for ${d} = 1, #${a} do ${eName}[${d}] = string.char(${a}[${d}]) end`);parts.push(`local ${b} = table.concat(${eName})`);}
-parts.push(`local ${c} = load or loadstring`);
-parts.push(`${c}(${b})`);
-parts.push('end');
-// join with semicolon+space
-theOutput = parts.join('; ');
-let blob=new Blob([theOutput],{type:'text/plain'});let url=URL.createObjectURL(blob);let aLink=document.createElement('a');aLink.href=url; aLink.download='obfuscated.lua'; document.body.appendChild(aLink); aLink.click(); document.body.removeChild(aLink); URL.revokeObjectURL(url);
-};
-</script>
+function getRandomName(existing) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const chars = letters + '0123456789_';
+  const reserved = [
+    'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function',
+    'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then',
+    'true', 'until', 'while', 'load', 'loadstring', 'string', 'table',
+    'concat', 'char'
+  ];
+  let name;
+  do {
+    const len = 5 + Math.floor(Math.random() * 4);
+    name = letters.charAt(Math.random() * letters.length | 0);
+    for (let i = 1; i < len; i++) {
+      name += chars.charAt(Math.random() * chars.length | 0);
+    }
+  } while (existing.includes(name) || reserved.includes(name.toLowerCase()));
+  existing.push(name);
+  return name;
+}const normalBtn = document.getElementById('normalBtn'); const hardBtn = document.getElementById('hardBtn'); const fileInput = document.getElementById('fileInput'); const codeInput = document.getElementById('codeInput'); const obfuscateBtn = document.getElementById('obfuscateBtn'); let mode = null;
+
+normalBtn.onclick = () => { mode = 'normal'; normalBtn.classList.add('selected'); hardBtn.classList.remove('selected'); };
+
+hardBtn.onclick = () => { mode = 'hard'; hardBtn.classList.add('selected'); normalBtn.classList.remove('selected'); };
+
+fileInput.onchange = e => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = e => codeInput.value = e.target.result; reader.readAsText(file); } };
+
+obfuscateBtn.onclick = () => { const m = mode || 'normal'; if (!mode) normalBtn.classList.add('selected');
+
+const code = codeInput.value; if (!code.trim()) { alert('Enter Lua code first'); return; }
+
+const bytes = []; for (let i = 0; i < code.length; i++) { bytes.push(code.charCodeAt(i)); }
+
+const names = []; const vA = getRandomName(names); const vB = getRandomName(names); const vC = getRandomName(names); const vD = getRandomName(names); const vE = m === 'hard' ? getRandomName(names) : null;
+
+const parts = ['--[[OBFUSCATED BY REO]]--', 'do'];
+
+if (bytes.length <= 50) { parts.push(local ${vA} = {${bytes.join(',')}}); } else { parts.push(local ${vA} = {); for (let i = 0; i < bytes.length; i += 50) { const chunk = bytes.slice(i, i + 50).join(','); parts.push(${chunk}${i + 50 < bytes.length ? ',' : ''}); } parts.push('}'); }
+
+if (m === 'normal') { parts.push(local ${vB} = ""); parts.push(for ${vD} = 1, #${vA} do ${vB} = ${vB} .. string.char(${vA}[${vD}]) end); } else { parts.push(local ${vE} = {}); parts.push(for ${vD} = 1, #${vA} do ${vE}[${vD}] = string.char(${vA}[${vD}]) end); parts.push(local ${vB} = table.concat(${vE})); }
+
+parts.push(local ${vC} = load or loadstring); parts.push(${vC}(${vB})); parts.push('end');
+
+const output = parts.join('; ');
+
+const blob = new Blob([output], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'obfuscated.lua'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); }; </script>
+
 </body>
 </html>
